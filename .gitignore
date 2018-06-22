@@ -1,0 +1,44 @@
+# See http://help.github.com/ignore-files/ for more about ignoring files.
+
+# compiled output
+frontend/dist
+frontend/dist-server
+frontend/tmp
+frontend/out-tsc
+frontend/package-lock.json
+
+# dependencies
+frontend/node_modules
+
+# IDEs and editors
+/.idea
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+
+# misc
+*/.sass-cache
+*/connect.lock
+*/coverage
+*/libpeerconnection.log
+*/npm-debug.log
+*/yarn-error.log
+*/testem.log
+*/typings
+
+# e2e
+*/e2e/*.js
+*/e2e/*.map
+
+# System Files
+.DS_Store
+Thumbs.db
+
+# Api
+
+api/node_modules
+api/package-lock.json
+*.iml

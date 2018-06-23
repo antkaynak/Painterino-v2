@@ -1,7 +1,11 @@
-import {AfterViewInit, Component, ElementRef, HostListener, Input, OnInit, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, ElementRef, HostListener, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
 
 import {pairwise, switchMap, takeUntil} from 'rxjs/operators';
 import {fromEvent} from "rxjs/internal/observable/fromEvent";
+import {SocketService} from "../../services/socket.service";
+import {Subject} from "rxjs";
+import { map } from 'rxjs/operators';
+import {Subscription} from "rxjs/internal/Subscription";
 
 
 @Component({
@@ -9,11 +13,29 @@ import {fromEvent} from "rxjs/internal/observable/fromEvent";
   templateUrl: './canvas.component.html',
   styleUrls: ['./canvas.component.css']
 })
-export class CanvasComponent implements OnInit, AfterViewInit {
+export class CanvasComponent implements OnInit, OnDestroy, AfterViewInit {
 
-  constructor() { }
+  messages : Subject<any>;
+  messagesSubscription: Subscription;
+
+  constructor(private socketService: SocketService) {
+    this.messages = <Subject<any>>socketService
+      .connect().pipe(map((response: any): any => {
+        return response;
+      }));
+    this.messagesSubscription = this.messages.subscribe(msg => {
+      msg = JSON.parse(msg);
+      this.drawOnCanvas(msg.prevPos, msg.currentPos);
+    });
+  }
 
   ngOnInit() {
+  }
+
+  ngOnDestroy() {
+    if(this.messagesSubscription != null){
+      this.messagesSubscription.unsubscribe();
+    }
   }
 
   // a reference to the canvas element from our template
@@ -83,6 +105,10 @@ export class CanvasComponent implements OnInit, AfterViewInit {
         };
 
         // this method we'll implement soon to do the actual drawing
+        this.messages.next({
+          prevPos,
+          currentPos
+        });
         this.drawOnCanvas(prevPos, currentPos);
       });
   }

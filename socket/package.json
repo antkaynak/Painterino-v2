@@ -1,0 +1,14 @@
+{
+  "name": "painterino-v2",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node ./bin/www"
+  },
+  "dependencies": {
+    "express": "^4.16.3",
+    "moment": "^2.22.2",
+    "morgan": "^1.9.0",
+    "socketio": "^1.0.0"
+  }
+}

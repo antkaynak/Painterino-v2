@@ -7,6 +7,7 @@ import {PreloadAllModules, RouterModule} from "@angular/router";
 import { PageNotFoundComponent } from './page-not-found/page-not-found.component';
 import {AppRoutes} from "./app.routes";
 import {MainModule} from "./main/main.module";
+import {SocketService} from "./services/socket.service";
 
 
 @NgModule({
@@ -20,7 +21,7 @@ import {MainModule} from "./main/main.module";
     MainModule,
     RouterModule.forRoot(AppRoutes, {useHash: false, preloadingStrategy: PreloadAllModules})
   ],
-  providers: [],
+  providers: [SocketService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

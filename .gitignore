@@ -1,11 +1,21 @@
 # See http://help.github.com/ignore-files/ for more about ignoring files.
 
-# compiled output
+# Frontend
 frontend/dist
 frontend/dist-server
 frontend/tmp
 frontend/out-tsc
 frontend/package-lock.json
+
+# Socket
+socket/node_modules
+socket/package-lock.json
+
+# Api
+api/node_modules
+api/package-lock.json
+
+*.iml
 
 # dependencies
 frontend/node_modules
@@ -36,9 +46,3 @@ frontend/node_modules
 # System Files
 .DS_Store
 Thumbs.db
-
-# Api
-
-api/node_modules
-api/package-lock.json
-*.iml

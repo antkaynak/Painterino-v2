@@ -8,20 +8,28 @@ import { PageNotFoundComponent } from './page-not-found/page-not-found.component
 import {AppRoutes} from "./app.routes";
 import {MainModule} from "./main/main.module";
 import {SocketService} from "./services/socket.service";
+import {AuthService} from "./services/auth.service";
+import {AuthGuardService} from "./services/auth-guard.service";
+import {LobbyModule} from "./lobby/lobby.module";
+import {NonAuthGuardService} from "./services/non-auth-guard.service";
+import {HttpClientModule} from "@angular/common/http";
+
 
 
 @NgModule({
   declarations: [
     AppComponent,
-    PageNotFoundComponent,
+    PageNotFoundComponent
   ],
   imports: [
     BrowserModule,
     BrowserAnimationsModule,
+    HttpClientModule,
     MainModule,
+    LobbyModule,
     RouterModule.forRoot(AppRoutes, {useHash: false, preloadingStrategy: PreloadAllModules})
   ],
-  providers: [SocketService],
+  providers: [SocketService, AuthService, AuthGuardService, NonAuthGuardService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

@@ -15,17 +15,17 @@ import {Subscription} from "rxjs/internal/Subscription";
 })
 export class CanvasComponent implements OnInit, OnDestroy, AfterViewInit {
 
-  messages : Subject<any>;
-  messagesSubscription: Subscription;
+  socketXY : Subject<any>;
+  socketXYSubscription: Subscription;
 
   constructor(private socketService: SocketService) {
-    this.messages = <Subject<any>>socketService
+    this.socketXY = <Subject<any>>socketService
       .connect().pipe(map((response: any): any => {
         return response;
       }));
-    this.messagesSubscription = this.messages.subscribe(msg => {
-      msg = JSON.parse(msg);
-      this.drawOnCanvas(msg.prevPos, msg.currentPos);
+    this.socketXYSubscription = this.socketXY.subscribe(xy => {
+      xy = JSON.parse(xy);
+      this.drawOnCanvas(xy.prevPos, xy.currentPos);
     });
   }
 
@@ -33,8 +33,8 @@ export class CanvasComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   ngOnDestroy() {
-    if(this.messagesSubscription != null){
-      this.messagesSubscription.unsubscribe();
+    if(this.socketXYSubscription != null){
+      this.socketXYSubscription.unsubscribe();
     }
   }
 
@@ -104,8 +104,7 @@ export class CanvasComponent implements OnInit, OnDestroy, AfterViewInit {
           y: res[1].clientY - rect.top
         };
 
-        // this method we'll implement soon to do the actual drawing
-        this.messages.next({
+        this.socketXY.next({
           prevPos,
           currentPos
         });
@@ -114,7 +113,7 @@ export class CanvasComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   private drawOnCanvas(prevPos: { x: number, y: number }, currentPos: { x: number, y: number }) {
-    // incase the context is not set
+    // in case the context is not set
     if (!this.cx) { return; }
 
     // start our drawing path

@@ -43,7 +43,7 @@ io.on('connection', (socket) => {
         list.addUser(new User(socket.id,params.name,params.room));
 
         //not using broadcast because we want to send the list to the newly connected user as well.
-        // io.to(params.room).emit('updateUserList', list.getUserList(params.room));
+        io.to(params.room).emit('updateUserList', list.getUserList(params.room));
 
         // socket.emit('newMessage',{
         //     from: 'Chat App',
@@ -59,12 +59,12 @@ io.on('connection', (socket) => {
 
 
     });
-    //
+
     socket.on('disconnect', () => {
         console.log('An user was disconnected');
         const user = list.removeUser(socket.id);
         if(user){
-            // io.to(user.room).emit('updateUserList', list.getUserList(params.room));
+            io.to(user.room).emit('updateUserList', list.getUserList(params.room));
             // io.to(user.room).emit('newMessage',{
             //     from: `${params.room}`,
             //     text: `User ${params.name} left!`,
@@ -72,8 +72,8 @@ io.on('connection', (socket) => {
             // });
         }
     });
-    //
-    socket.on('createMessage', (message)=>{
+
+    socket.on('createXY', (xy)=>{
         //send to all clients
         //io.emit('newMessage', {
         //    from: message.from,
@@ -82,7 +82,14 @@ io.on('connection', (socket) => {
         //});
 
         //send to all but this socket
-        socket.broadcast.to(list.getUser(socket.id).room).emit('message', message);
+        socket.broadcast.to(list.getUser(socket.id).room).emit('receiveXY', xy);
+    });
+
+    socket.on('createMessage', (message, callback)=>{
+        socket.broadcast.to(list.getUser(socket.id).room).emit('receiveMessage', {
+            message
+        });
+        callback();
     });
 });
 

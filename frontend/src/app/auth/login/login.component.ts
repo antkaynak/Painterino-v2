@@ -21,7 +21,6 @@ export class LoginComponent implements OnInit {
       'email': new FormControl("test@email.com", [Validators.required, Validators.pattern(this.emailPattern)]),
       'password': new FormControl("test123", Validators.required),
     });
-
   }
 
   onSubmitted() {

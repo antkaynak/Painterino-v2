@@ -15,12 +15,20 @@ const userSchema =  new Schema({
         trim: true,
         unique: true,
         validate: {
-            //validator:(value)=>{
-            //    return validator.isEmail(value);
-            //},
-            validator: validator.isEmail,
+            validator:(value)=>{
+                const re = /^[a-zA-Z0-9_!#$%&’*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$/;
+                return (value == null || value.trim().length < 1) || re.test(value);
+            },
+            //validator: validator.isEmail,
             message: '{VALUE} is not a valid email'
         }
+    },
+    username: {
+        type: String,
+        required: true,
+        minlength: 1,
+        trim: true,
+        unique: true
     },
     password:{
         type: String,

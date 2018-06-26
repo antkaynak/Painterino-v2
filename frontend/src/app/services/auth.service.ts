@@ -22,6 +22,20 @@ export class AuthService {
     }))
   }
 
+  register(email,username,password, passwordConfirm){
+    const body = {
+      email,
+      username,
+      password,
+      passwordConfirm
+    };
+    return this.http.post(this.url+'/users',body).pipe(map(res=>{
+      console.log(res);
+      this.authenticated = true;
+      return res;
+    }));
+  }
+
   logOut(){
     this.authenticated = false;
   }

@@ -23,7 +23,10 @@ const authenticate = (req, res, next) => {
 
 // POST /users
 router.post('/users', (req, res) => {
-    const body = _.pick(req.body, ['email', 'password']);
+    const body = _.pick(req.body, ['email', 'username','password', 'passwordConfirm']);
+    if(body.password !== body.passwordConfirm){
+        return res.status(400).send('Passwords do not match.');
+    }
     const user = new User(body);
 
     user.save().then(() => {

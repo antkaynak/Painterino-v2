@@ -1,0 +1,55 @@
+<div style="width: 100%; height: 100vh;background-color: #323232">
+  <div style="width: 80%; margin: auto; text-align: center; padding-top: 300px">
+
+    <mat-card style="width: 30%; margin: auto">
+        <form [formGroup]="logInForm" (ngSubmit)="onSubmitted()">
+          <div class="form-group">
+            <mat-form-field>
+            <input type="text"
+                   id="email"
+                   class="form-control"
+                   name="email"
+                   placeholder="Email"
+                   formControlName="email"
+                   [maxlength]="240"
+                   matInput
+            >
+
+              </mat-form-field>
+          </div>
+
+          <div class="form-group">
+            <mat-form-field>
+            <input type="password"
+                   id="password"
+                   class="form-control"
+                   name="password"
+                   placeholder="Password"
+                   formControlName="password"
+                   [maxlength]="240"
+                   matInput
+            >
+              </mat-form-field>
+          </div>
+
+
+          <div class="form-group">
+            <mat-list >
+              <mat-list-item ><a routerLink="/signup" style="color:gray; font-size: 0.80em; margin: auto">Don't have an account? Sign up!</a></mat-list-item>
+              <mat-list-item><a routerLink="/forgot-password" style="color:gray; font-size: 0.75em; margin: auto">I forgot my password.</a></mat-list-item>
+              <mat-list-item><button mat-raised-button style="margin: auto" type="submit" [disabled]="logInForm.invalid || logInForm.pending">Login</button>
+              </mat-list-item>
+            </mat-list>
+          </div>
+
+
+
+
+        </form>
+
+
+    </mat-card>
+
+  </div>
+</div>
+

@@ -1,0 +1,13 @@
+<mat-form-field>
+<input matInput #room id="room" type="text" (keyup.enter)="selectRoom(room)">
+<mat-hint>asmfdsmkg</mat-hint>
+<mat-error *ngIf="true">
+  Please enter a valid room name
+</mat-error>
+</mat-form-field>
+<button mat-raised-button (click)="selectRoom(room)">Select Room</button>
+
+<div *ngFor="let room of activeRooms">
+  <p style="color:red">{{room}}</p>
+</div>
+

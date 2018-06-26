@@ -72,8 +72,8 @@ export class SocketService {
 
   connectToChat(){
     return new Observable(observer => {
-      this.socket.on('receiveMessage', (data: ChatMessage)=>{
-        observer.next(data);
+      this.socket.on('receiveMessage', (data)=>{
+        observer.next(JSON.parse(data.message));
       });
       return () => {
         this.socket.disconnect();

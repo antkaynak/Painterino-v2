@@ -10,7 +10,7 @@ export class NonAuthGuardService implements CanActivate{
 
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean> | Promise<boolean> | boolean {
     if(this.authService.authenticated){
-      this.router.navigate(['/']);
+      this.router.navigate(['/lobby']);
     }
     return !this.authService.authenticated;
   }

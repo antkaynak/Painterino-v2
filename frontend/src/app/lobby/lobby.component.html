@@ -1,32 +1,8 @@
-
-<!--<div class="container-fluid" fxLayout="row" fxLayout.xs="column" fxLayoutWrap fxLayoutGap="0.5%" fxLayoutAlign="center">-->
-  <!--<div fxFlex="20%" class="left-panel"><app-user-list></app-user-list></div>-->
-  <!--<div fxFlex="60%" class="canvas-panel"><app-canvas></app-canvas></div>-->
-  <!--<div fxFlex="20%" class="right-panel"><app-chat></app-chat></div>-->
-<!--</div>-->
 <div style="width: 100%; height: 100vh;background-color: #323232">
 <div style="width: 80%; margin: auto; text-align: center; padding-top: 300px">
 
   <mat-card style="width: 50%; margin: auto">
-
-  <mat-form-field>
-    <input matInput #room id="room" type="text" (keyup.enter)="logIn()">
-    <mat-hint>asmfdsmkg</mat-hint>
-    <mat-error *ngIf="true">
-      Please enter a valid room name
-    </mat-error>
-  </mat-form-field>
-
-
-  <button mat-raised-button (click)="logIn()">Login</button>
-
-  <app-auth></app-auth>
-
-
-  <div *ngFor="let room of activeRooms">
-    <p style="color:red">{{room}}</p>
-  </div>
-
+    <app-room-list></app-room-list>
   </mat-card>
 
 </div>

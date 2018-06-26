@@ -13,6 +13,7 @@ import {AuthGuardService} from "./services/auth-guard.service";
 import {LobbyModule} from "./lobby/lobby.module";
 import {NonAuthGuardService} from "./services/non-auth-guard.service";
 import {HttpClientModule} from "@angular/common/http";
+import {AuthModule} from "./auth/auth.module";
 
 
 
@@ -25,6 +26,7 @@ import {HttpClientModule} from "@angular/common/http";
     BrowserModule,
     BrowserAnimationsModule,
     HttpClientModule,
+    AuthModule,
     MainModule,
     LobbyModule,
     RouterModule.forRoot(AppRoutes, {useHash: false, preloadingStrategy: PreloadAllModules})

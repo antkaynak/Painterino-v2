@@ -1,12 +1,12 @@
 import {NgModule} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {RouterModule} from "@angular/router";
-
 import {FlexLayoutModule} from "@angular/flex-layout";
-import {LobbyRoutes} from "./lobby.routes";
-import {LobbyComponent} from "./lobby.component";
 import {MaterialModule} from "../material.module";
-import { RoomListComponent } from './room-list/room-list.component';
+import {LoginComponent} from "./login/login.component";
+import {RegisterComponent} from "./register/register.component";
+import {AuthRoutes} from "./auth.routes";
+import {ReactiveFormsModule} from "@angular/forms";
 
 
 @NgModule({
@@ -14,12 +14,13 @@ import { RoomListComponent } from './room-list/room-list.component';
     CommonModule,
     FlexLayoutModule,
     MaterialModule,
-    RouterModule.forChild(LobbyRoutes)
+    ReactiveFormsModule,
+    RouterModule.forChild(AuthRoutes)
   ],
   declarations: [
-    LobbyComponent,
-    RoomListComponent
+    LoginComponent,
+    RegisterComponent
   ]
 })
-export class LobbyModule {
+export class AuthModule {
 }

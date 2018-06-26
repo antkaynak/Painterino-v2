@@ -63,8 +63,10 @@ io.on('connection', (socket) => {
     socket.on('disconnect', () => {
         console.log('An user was disconnected');
         const user = list.removeUser(socket.id);
+        console.log(user);
         if(user){
-            io.to(user.room).emit('updateUserList', list.getUserList(params.room));
+            console.log('flag');
+            io.to(user.room).emit('updateUserList', list.getUserList(user.room));
             // io.to(user.room).emit('newMessage',{
             //     from: `${params.room}`,
             //     text: `User ${params.name} left!`,

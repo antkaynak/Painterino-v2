@@ -14,6 +14,7 @@ socket/package-lock.json
 # Api
 api/node_modules
 api/package-lock.json
+api/config/config.json
 
 *.iml
 

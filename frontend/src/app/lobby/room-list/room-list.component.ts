@@ -2,6 +2,9 @@ import {Component, ElementRef, OnDestroy, OnInit} from '@angular/core';
 import {Subscription} from "rxjs/internal/Subscription";
 import {Router} from "@angular/router";
 import {SocketService} from "../../services/socket.service";
+import {MatDialog} from "@angular/material";
+import {CreateComponent} from "./create/create.component";
+import {JoinComponent} from "./join/join.component";
 
 @Component({
   selector: 'app-room-list',
@@ -13,7 +16,7 @@ export class RoomListComponent implements OnInit, OnDestroy {
   activeRooms: any = [];
   activeRoomsSubscription: Subscription;
 
-  constructor(private socketService: SocketService, private router: Router) { }
+  constructor(private socketService: SocketService, private router: Router, public dialog: MatDialog) { }
 
 
   ngOnInit() {
@@ -30,10 +33,25 @@ export class RoomListComponent implements OnInit, OnDestroy {
     }
   }
 
-  selectRoom(room : HTMLInputElement){
-    const selectedRoom = room.value;
-    this.socketService.selectRoom(selectedRoom);
-    this.router.navigate(['/']);
+  openCreate() {
+    const dialogRef = this.dialog.open(CreateComponent, {
+      width: '400px'
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      console.log('The dialog was closed', result);
+    });
   }
 
+  openJoin(roomName) {
+    console.log('hey', roomName);
+    const dialogRef = this.dialog.open(JoinComponent, {
+      width: '400px',
+      data: {roomName}
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      console.log('The dialog was closed', result);
+    });
+  }
 }

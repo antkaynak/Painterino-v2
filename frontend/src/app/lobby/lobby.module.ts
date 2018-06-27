@@ -7,6 +7,11 @@ import {LobbyRoutes} from "./lobby.routes";
 import {LobbyComponent} from "./lobby.component";
 import {MaterialModule} from "../material.module";
 import { RoomListComponent } from './room-list/room-list.component';
+import {LoginComponent} from "./auth/login/login.component";
+import {RegisterComponent} from "./auth/register/register.component";
+import {ReactiveFormsModule} from "@angular/forms";
+import { CreateComponent } from './room-list/create/create.component';
+import { JoinComponent } from './room-list/join/join.component';
 
 
 @NgModule({
@@ -14,12 +19,20 @@ import { RoomListComponent } from './room-list/room-list.component';
     CommonModule,
     FlexLayoutModule,
     MaterialModule,
+    ReactiveFormsModule,
     RouterModule.forChild(LobbyRoutes)
   ],
   declarations: [
     LobbyComponent,
-    RoomListComponent
-  ]
+    RoomListComponent,
+    LoginComponent,
+    RegisterComponent,
+    CreateComponent,
+    JoinComponent
+  ],entryComponents: [
+    CreateComponent,
+    JoinComponent
+  ],
 })
 export class LobbyModule {
 }

@@ -12,8 +12,9 @@ import {AuthService} from "./services/auth.service";
 import {AuthGuardService} from "./services/auth-guard.service";
 import {LobbyModule} from "./lobby/lobby.module";
 import {NonAuthGuardService} from "./services/non-auth-guard.service";
-import {HttpClientModule} from "@angular/common/http";
-import {AuthModule} from "./auth/auth.module";
+import {HTTP_INTERCEPTORS, HttpClientModule} from "@angular/common/http";
+import {AuthInterceptorService} from "./services/auth-interceptor.service";
+import {MAT_DIALOG_DEFAULT_OPTIONS} from "@angular/material";
 
 
 
@@ -26,12 +27,18 @@ import {AuthModule} from "./auth/auth.module";
     BrowserModule,
     BrowserAnimationsModule,
     HttpClientModule,
-    AuthModule,
     MainModule,
     LobbyModule,
     RouterModule.forRoot(AppRoutes, {useHash: false, preloadingStrategy: PreloadAllModules})
   ],
-  providers: [SocketService, AuthService, AuthGuardService, NonAuthGuardService],
+  providers: [
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: AuthInterceptorService,
+      multi: true
+    },
+    {provide: MAT_DIALOG_DEFAULT_OPTIONS, useValue: {hasBackdrop: false}},
+    SocketService, AuthService, AuthGuardService, NonAuthGuardService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

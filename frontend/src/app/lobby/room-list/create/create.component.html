@@ -1,0 +1,46 @@
+<h1 mat-dialog-title>Create a room</h1>
+<div mat-dialog-content>
+
+  <form [formGroup]="roomForm" (ngSubmit)="onSubmitted()">
+    <div class="form-group">
+      <mat-form-field>
+        <input type="text"
+               id="roomName"
+               class="form-control"
+               name="roomName"
+               placeholder="Room Name"
+               formControlName="roomName"
+               [maxlength]="12"
+               matInput
+        >
+        <mat-hint>Crazy Potato</mat-hint>
+        <mat-error *ngIf="true">
+          Please enter a valid room name
+        </mat-error>
+      </mat-form-field>
+
+    </div>
+
+    <div class="form-group">
+      <mat-form-field>
+        <input type="text"
+               id="roomPassword"
+               class="form-control"
+               name="roomPassword"
+               placeholder="Room Password"
+               formControlName="roomPassword"
+               [maxlength]="20"
+               matInput
+        >
+      </mat-form-field>
+
+    </div>
+
+    <div mat-dialog-actions class="buttons">
+      <button mat-raised-button type="button" (click)="cancel()">Cancel</button>
+      <button mat-raised-button type="submit">Create Room</button>
+    </div>
+  </form>
+
+</div>
+

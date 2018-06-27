@@ -20,12 +20,18 @@ export class SocketService {
   // Our socket connection
   private socket;
 
-  private room;
+  private room: { roomName: null, roomPassword: null };
+
+  private userName: string = 'admin';
 
   constructor(private http: HttpClient) { }
 
   selectRoom(room){
     this.room = room;
+  }
+
+  selectName(userName){
+    this.userName = userName;
   }
 
   getActiveRooms(){
@@ -92,13 +98,13 @@ export class SocketService {
   }
 
   connect(): Subject<MessageEvent> {
-    if(!this.room){
+    if(!this.room || this.room == null || this.room == undefined){
       console.log('No room selected.');
       return;
     }
     this.socket = io(this.url);
 
-    this.socket.emit('join', { name:'admin', room: this.room}, function(error){
+    this.socket.emit('join', { room:this.room, userName: this.userName}, function(error){
       if(error){
         return alert('An error occurred!');
       }

@@ -13,4 +13,4 @@ export const LobbyRoutes: Routes = [
       {path: 'login', component: LoginComponent, canActivate:[NonAuthGuardService]},
       {path: 'register', component: RegisterComponent, canActivate:[NonAuthGuardService]}
     ]},
-];
+];  //TODO fix the routes .. lobby is now / and main is now /:roomName and login is just /login /register

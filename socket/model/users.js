@@ -3,6 +3,8 @@
 //a data structure to store active users and their information about
 //which room they are in and their names
 
+// const {Room} = require('./rooms');
+
 
 class User{
 
@@ -36,8 +38,8 @@ class ActiveUserList{
         return this.users.filter((user)=> user.id === id)[0];
     }
 
-    getUserList(room){
-        const users = this.users.filter((user)=> user.room === room);
+    getUserList(roomName){
+        const users = this.users.filter((user)=> user.room.roomName === roomName);
         //const namesArray = users.map((user)=> user.name);
         return users;
     }

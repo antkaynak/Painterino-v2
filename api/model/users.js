@@ -58,6 +58,10 @@ userSchema.methods.toJSON = function(){
 //not using arrow function because we want to use 'this' keyword
 userSchema.methods.generateAuthToken = function(){
     const user = this;
+    if(user.tokens[0] != null){
+        return user.save().then(()=> user.tokens[0].token);
+    }
+
     const access = 'auth';
     const token = jwt.sign({
         _id: user._id.toHexString(),

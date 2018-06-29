@@ -25,7 +25,9 @@ app.set('port', port);
  * Listen on provided port, on all network interfaces.
  */
 
-server.listen(port);
+server.listen(port, function(){
+    console.log(`Started server on ${port}`);
+});
 server.on('error', onError);
 server.on('listening', onListening);
 

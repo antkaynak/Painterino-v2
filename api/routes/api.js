@@ -17,6 +17,7 @@ const authenticate = (req, res, next) => {
         req.token = token;
         next();
     }).catch((e) => {
+        console.log(e);
         res.status(401).send();
     });
 };
@@ -32,7 +33,10 @@ router.post('/users', (req, res) => {
     user.save().then(() => {
         return user.generateAuthToken();
     }).then((token) => {
-        res.header('x-auth', token).send(user);
+        res.set({
+            "x-auth": token,
+            "Access-Control-Expose-Headers":"x-auth"
+        }).send(user);
     }).catch((e) => {
         res.status(400).send(e);
     })
@@ -47,7 +51,12 @@ router.post('/users/login', (req, res) => {
 
     User.findByCredentials(body.email, body.password).then((user) => {
         return user.generateAuthToken().then((token) => {
-            res.header('x-auth', token).send(user);
+            //have to set expose headers so angular can pick it up
+            res.set({
+                "x-auth": token,
+                "Access-Control-Expose-Headers":"x-auth"
+            }).send(user);
+            // res.header('x-auth', token).send(user);
         });
     }).catch((e) => {
         res.status(400).send();

@@ -1,9 +1,6 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {ErrorStateMatcher, ShowOnDirtyErrorStateMatcher} from "@angular/material";
-import {AuthService} from "../services/auth.service";
-import {ActivatedRoute, Router} from "@angular/router";
-import {catchError, tap} from "rxjs/operators";
-import {throwError} from "rxjs/internal/observable/throwError";
+import {Router} from "@angular/router";
 
 
 @Component({
@@ -14,28 +11,13 @@ import {throwError} from "rxjs/internal/observable/throwError";
     {provide: ErrorStateMatcher, useClass: ShowOnDirtyErrorStateMatcher}
   ]
 })
-export class LobbyComponent implements OnInit, OnDestroy {
+export class LobbyComponent implements OnInit {
 
-  constructor(private authService : AuthService, private router: Router, private route: ActivatedRoute) { }
+  constructor(private router: Router) { }
 
   ngOnInit() {
-    if(this.authService.checkJWT()){
-      this.authService.getUser()
-        .pipe(catchError( error=>{
-          this.router.navigate(['/lobby/login']);
-          return throwError(error);
-        }))
-        .subscribe( ()=>{
-          console.log('?');
-          this.router.navigate(['./rooms'], { relativeTo: this.route });
-        });
-    }else{
-      this.router.navigate(['/lobby/login']);
-    }
-
+    this.router.navigate(['/login']);
   }
 
-  ngOnDestroy() {
-  }
 
 }

@@ -31,7 +31,7 @@ export class LoginComponent implements OnInit {
     console.log(password);
     this.authService.logIn(email, password).subscribe(res => {
       console.log(res);
-      this.router.navigate(['/lobby/rooms']);
+      this.router.navigate(['/rooms']);
     });
   }
 

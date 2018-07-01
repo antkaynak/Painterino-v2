@@ -10,7 +10,7 @@ import {createError} from "@angular/core/src/render3/instructions";
 export class AuthService {
 
   authenticated: boolean = false;
-  private url: string = 'http://192.168.1.90:3000/api';
+  private url: string = 'http://192.168.1.41:3000/api';
   private user = {};
 
   constructor(private http: HttpClient) { }

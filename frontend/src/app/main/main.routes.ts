@@ -3,5 +3,5 @@ import {MainComponent} from "./main.component";
 import {AuthGuardService} from "../services/auth-guard.service";
 
 export const MainRoutes: Routes = [
-  {path: '', component: MainComponent, canActivate: [AuthGuardService]}
+  {path: 'room/:roomName', component: MainComponent, canActivate: [AuthGuardService]}
 ];

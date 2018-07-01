@@ -8,7 +8,7 @@ import {RegisterComponent} from "./auth/register/register.component";
 
 
 export const LobbyRoutes: Routes = [
-  {path: 'lobby', component: LobbyComponent, children: [
+  {path: '', component: LobbyComponent, children: [
       {path: 'rooms', component: RoomListComponent, canActivate:[AuthGuardService]},
       {path: 'login', component: LoginComponent, canActivate:[NonAuthGuardService]},
       {path: 'register', component: RegisterComponent, canActivate:[NonAuthGuardService]}

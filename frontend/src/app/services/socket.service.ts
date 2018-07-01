@@ -16,7 +16,7 @@ export class SocketService {
 
   //TODO function names and their order
 
-  private url = 'http://192.168.1.90:3001';
+  private url = 'http://192.168.1.41:3001';
   // Our socket connection
   private socket;
 
@@ -36,7 +36,7 @@ export class SocketService {
 
   getActiveRooms(){
     return timer(0, 10000)
-      .pipe(flatMap(() => this.http.get('http://192.168.1.90:3001/lobby/rooms')));
+      .pipe(flatMap(() => this.http.get('http://192.168.1.41:3001/lobby/rooms')));
   }
 
   getActiveUsers(){

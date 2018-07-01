@@ -16,7 +16,7 @@ export class RoomListComponent implements OnInit, OnDestroy {
   activeRooms: any = [];
   activeRoomsSubscription: Subscription;
 
-  constructor(private socketService: SocketService, private router: Router, public dialog: MatDialog) { }
+  constructor(private socketService: SocketService, public dialog: MatDialog) { }
 
 
   ngOnInit() {

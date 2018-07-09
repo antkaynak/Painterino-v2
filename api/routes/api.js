@@ -3,24 +3,8 @@ const router = express.Router();
 const {ObjectID} = require('mongodb');
 const {User} = require('../model/users');
 const _ = require('lodash');
+const {authenticate} = require('../middleware/auth');
 
-// auth middleware
-const authenticate = (req, res, next) => {
-    const token = req.header('x-auth');
-
-    User.findByToken(token).then((user) => {
-        if (!user) {
-            return Promise.reject();
-        }
-
-        req.user = user;
-        req.token = token;
-        next();
-    }).catch((e) => {
-        console.log(e);
-        res.status(401).send();
-    });
-};
 
 // POST /users
 router.post('/users', (req, res) => {

@@ -6,6 +6,7 @@ import {SocketService} from "../../services/socket.service";
 import {Subject} from "rxjs";
 import { map } from 'rxjs/operators';
 import {Subscription} from "rxjs/internal/Subscription";
+import {ColorPickerService} from "ngx-color-picker";
 
 
 @Component({
@@ -15,21 +16,35 @@ import {Subscription} from "rxjs/internal/Subscription";
 })
 export class CanvasComponent implements OnInit, OnDestroy, AfterViewInit {
 
-  socketXY : Subject<any>;
+  // socketXY : Subject<any>;
   socketXYSubscription: Subscription;
 
-  constructor(private socketService: SocketService) {
-    this.socketXY = <Subject<any>>socketService
-      .connect().pipe(map((response: any): any => {
-        return response;
-      }));
-    this.socketXYSubscription = this.socketXY.subscribe(xy => {
+
+  public selectedColor: string = '#000000';
+
+  constructor(private socketService: SocketService, private cpService: ColorPickerService) {
+    // this.socketXY = <Subject<any>>socketService
+    //   .connect().pipe(map((response: any): any => {
+    //     return response;
+    //   }));
+    this.socketXYSubscription = this.socketService.subjectXY.subscribe(xy => {
       xy = JSON.parse(xy);
-      this.drawOnCanvas(xy.prevPos, xy.currentPos);
+      this.drawOnCanvas(xy.prevPos, xy.currentPos, xy.color);
     });
   }
 
   ngOnInit() {
+
+  }
+
+  public onChangeColorHex8(color: string) {
+    const hsva = this.cpService.stringToHsva(color, true);
+    if (hsva) {
+      console.log(hsva);
+      console.log('aaaaaaaaaa');
+      this.selectedColor = this.cpService.outputFormat(hsva, 'hex', null);
+      console.log(this.selectedColor);
+    }
   }
 
   ngOnDestroy() {
@@ -52,14 +67,10 @@ export class CanvasComponent implements OnInit, OnDestroy, AfterViewInit {
   private cx: CanvasRenderingContext2D;
 
   public ngAfterViewInit() {
+
     // get the context
     const canvasEl: HTMLCanvasElement = this.canvas.nativeElement;
     this.cx = canvasEl.getContext('2d');
-
-    console.log(this.canvasDiv);
-    console.log(this.canvasDiv.nativeElement);
-    console.log(this.canvasDiv.nativeElement.offsetWidth);
-    console.log(this.canvasDiv.nativeElement.offsetHeight);
     // set the width and height
     canvasEl.width = this.canvasDiv.nativeElement.offsetWidth;
     canvasEl.height = this.canvasDiv.nativeElement.offsetHeight;
@@ -68,10 +79,14 @@ export class CanvasComponent implements OnInit, OnDestroy, AfterViewInit {
     // set some default properties about the line
     this.cx.lineWidth = 3;
     this.cx.lineCap = 'round';
-    this.cx.strokeStyle = '#000';
+    this.cx.strokeStyle = this.selectedColor;
 
-    // we'll implement this method to start capturing mouse events
     this.captureEvents(canvasEl);
+
+    for(let i = 0; i < this.socketService.initCanvasData.length; i++){
+      let toDraw = JSON.parse(this.socketService.initCanvasData[i]);
+      this.drawOnCanvas(toDraw.prevPos, toDraw.currentPos, toDraw.color);
+    }
   }
 
   private captureEvents(canvasEl: HTMLCanvasElement) {
@@ -104,15 +119,16 @@ export class CanvasComponent implements OnInit, OnDestroy, AfterViewInit {
           y: res[1].clientY - rect.top
         };
 
-        this.socketXY.next({
+        this.socketService.subjectXY.next({
           prevPos,
-          currentPos
+          currentPos,
+          color: this.selectedColor
         });
-        this.drawOnCanvas(prevPos, currentPos);
+        this.drawOnCanvas(prevPos, currentPos, this.selectedColor);
       });
   }
 
-  private drawOnCanvas(prevPos: { x: number, y: number }, currentPos: { x: number, y: number }) {
+  private drawOnCanvas(prevPos: { x: number, y: number }, currentPos: { x: number, y: number }, color) {
     // in case the context is not set
     if (!this.cx) { return; }
 
@@ -125,6 +141,9 @@ export class CanvasComponent implements OnInit, OnDestroy, AfterViewInit {
       this.cx.moveTo(prevPos.x, prevPos.y); // from
       // draws a line from the start pos until the current position
       this.cx.lineTo(currentPos.x, currentPos.y);
+
+      // this.cx.fillStyle = color;
+      this.cx.strokeStyle = color;
 
       // strokes the current path with the styles we set earlier
       this.cx.stroke();

@@ -35,8 +35,8 @@ export class JoinComponent implements OnInit {
     const roomName = this.roomForm.controls.roomName.value;
     const roomPassword = this.roomForm.controls.roomPassword.value;
     this.socketService.selectRoom({roomName, roomPassword});
+    this.socketService.joinRoom();
     this.dialogRef.close();
-    this.router.navigate(['/room/'+roomName]);
   }
 
 

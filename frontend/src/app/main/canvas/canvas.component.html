@@ -1,3 +1,14 @@
-<div #canvasDiv style="width: 100%; height: 100vh">
-  <canvas #canvas style="background-color: white"></canvas>
+<div fxLayout="column" fxLayoutAlign="center" style="width: 100%; height: 100vh">
+  <div fxFlex="90%" #canvasDiv>
+    <canvas #canvas style="background-color: white"></canvas>
+  </div>
+  <div fxFlex="10%">
+    <input class="color-picker"
+           [cpDisableInput]="true"
+           [(colorPicker)]="selectedColor"
+           (colorPickerChange)="onChangeColorHex8($event)"
+           [cpPosition]="'top'" [style.background]="color"/>
+  </div>
+
 </div>
+

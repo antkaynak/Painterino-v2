@@ -8,6 +8,7 @@ import {FlexLayoutModule} from "@angular/flex-layout";
 import { UserListComponent } from './user-list/user-list.component';
 import { ChatComponent } from './chat/chat.component';
 import {MaterialModule} from "../material.module";
+import {ColorPickerModule} from "ngx-color-picker";
 
 
 @NgModule({
@@ -15,6 +16,7 @@ import {MaterialModule} from "../material.module";
     CommonModule,
     FlexLayoutModule,
     MaterialModule,
+    ColorPickerModule,
     RouterModule.forChild(MainRoutes)
   ],
   declarations: [

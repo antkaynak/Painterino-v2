@@ -15,6 +15,7 @@ export class UserListComponent implements OnInit, OnDestroy {
   constructor(private socketService: SocketService) { }
 
   ngOnInit() {
+    this.userList = this.socketService.initUserList;
     this.userListSubscription = this.socketService.getActiveUsers().subscribe(data=>{
       console.log(data);
       this.userList = data;

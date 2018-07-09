@@ -2,3 +2,7 @@
 .color-picker{
 
 }
+
+canvas{
+  cursor: crosshair;
+}

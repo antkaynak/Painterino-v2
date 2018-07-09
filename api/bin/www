@@ -6,8 +6,9 @@
 
 
 const app = require('../app').app;
-const server = require('../app').server;
 const debug = require('debug')('painterino-v2:server');
+const http = require('http');
+const sockets = require('../socket/socket');
 
 
 /**
@@ -21,7 +22,7 @@ app.set('port', port);
  * Create HTTP server.
  */
 
-// const server = http.createServer(app);
+const server = http.createServer(app);
 
 /**
  * Listen on provided port, on all network interfaces.
@@ -32,6 +33,8 @@ server.listen(port, function(){
 });
 server.on('error', onError);
 server.on('listening', onListening);
+
+sockets.init(server);
 
 /**
  * Normalize a port into a number, string, or false.

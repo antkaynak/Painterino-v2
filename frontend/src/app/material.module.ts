@@ -6,7 +6,7 @@ import {
   MatCardModule, MatDialogModule,
   MatFormFieldModule,
   MatInputModule,
-  MatListModule
+  MatListModule, MatSliderModule, MatToolbarModule
 } from "@angular/material";
 
 
@@ -20,6 +20,8 @@ const modules = [
   MatFormFieldModule,
   MatAutocompleteModule,
   MatDialogModule,
+  MatSliderModule,
+  MatToolbarModule
 ];
 
 @NgModule({

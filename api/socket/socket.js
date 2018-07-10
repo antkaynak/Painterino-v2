@@ -31,9 +31,14 @@ sockets.init = function(server){
                 }
 
                 const dsRoom = activeRoomList.getRoom(params.room.roomName);
+                console.log('*********************************************');
+                console.log(dsRoom);
+                console.log('*********************************************');
+
                 if(dsRoom){
-                    console.log('flag1');
-                    if(dsRoom.password !== null && dsRoom.password !== undefined && dsRoom.password !== params.room.roomPassword) {
+                    let paramPassword = params.room.roomPassword === null ? null: params.room.roomPassword.trim();
+                    paramPassword = paramPassword === '' ? null : paramPassword;
+                    if(dsRoom.roomPassword !== paramPassword) {
                         console.log('flag2');
                         socket.emit('joinResponse', {
                             status: 'fail'
@@ -53,11 +58,13 @@ sockets.init = function(server){
                     status: 'success',
                     game: {
                         activeUserList: activeRoomList.getRoom(params.room.roomName).getActiveUserNames(),
-                        canvasData: activeRoomList.getRoom(params.room.roomName).canvasData
+                        canvasData: activeRoomList.getRoom(params.room.roomName).canvasData,
+                        chatData: activeRoomList.getRoom(params.room.roomName).chatData
                     }
                 });
 
                 socket['roomName'] = params.room.roomName;
+                socket['token'] = params.token;
                 // userList.removeUser(socket.id);
                 // userList.addUser(new User(socket.id,params.userName,params.room));
 
@@ -86,6 +93,10 @@ sockets.init = function(server){
                     return Promise.reject();
                 }
                 const dsRoom = activeRoomList.getRoom(params.room.roomName);
+                console.log('*********************************************');
+                console.log(dsRoom);
+                console.log('*********************************************');
+
                 if(dsRoom){
                     socket.emit('createResponse', {
                         status: 'fail'
@@ -93,11 +104,14 @@ sockets.init = function(server){
                     return callback('Room already exists!');
                 }
 
-                let password = '';
-
-                if(params.room.roomPassword !== null || params.room.roomPassword !== undefined){
-                    password = params.room.roomPassword;
-                }
+                // let password = '';
+                // if(params.room.roomPassword !== null || params.room.roomPassword !== undefined){
+                //     password = params.room.roomPassword;
+                // }
+                let password = params.room.roomPassword === null ? null : params.room.roomPassword.trim();
+                password = password === '' ? null : password;
+                console.log(password);
+                console.log(params.room.roomPassword);
                 let room = new Room(params.room.roomName, password);
                 room.activeUserList.addUser(new ActiveUser(socket.id, user._id, params.room.roomName, user.username));
                 activeRoomList.addRoom(room);
@@ -110,12 +124,14 @@ sockets.init = function(server){
                     game: {
                         activeUserList: room.getActiveUserNames(),
                         // canvas: activeRoomList.getRoom(socket['roomName']).canvasData
-                        canvasData: []
+                        canvasData: [],
+                        chatData: []
                     }
 
                 });
 
                 socket['roomName'] = params.room.roomName;
+                socket['token'] = params.token;
 
 
                 // userList.removeUser(socket.id);
@@ -159,12 +175,20 @@ sockets.init = function(server){
         });
 
         socket.on('createXY', (xy)=>{
+            if(socket['token'] === undefined){
+                return;
+            }
             //send to all but this socket
-            activeRoomList.getRoom(socket['roomName']).canvasData.push(xy);
+            activeRoomList.getRoom(socket['roomName']).pushCanvasData(xy);
             socket.broadcast.to(socket['roomName']).emit('receiveXY', xy);
         });
 
         socket.on('createMessage', (message, callback)=>{
+            if(socket['token'] === undefined){
+                return;
+            }
+
+            activeRoomList.getRoom(socket['roomName']).pushChatData(message);
             socket.broadcast.to(socket['roomName']).emit('receiveMessage', {
                 message
             });

@@ -55,6 +55,15 @@ class Room{
         this.roomPassword = roomPassword;
         this.activeUserList = new ActiveUserList();
         this.canvasData = [];
+        this.chatData = [];
+    }
+
+    pushCanvasData(xy){
+        this.canvasData.push(xy);
+    }
+
+    pushChatData(message){
+        this.chatData.push(message);
     }
 
     addUser(user){

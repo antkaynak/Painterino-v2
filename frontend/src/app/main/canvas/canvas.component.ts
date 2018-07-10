@@ -21,6 +21,7 @@ export class CanvasComponent implements OnInit, OnDestroy, AfterViewInit {
 
 
   public selectedColor: string = '#000000';
+  public selectedSize: number = 3;
 
   constructor(private socketService: SocketService, private cpService: ColorPickerService) {
     // this.socketXY = <Subject<any>>socketService
@@ -29,7 +30,7 @@ export class CanvasComponent implements OnInit, OnDestroy, AfterViewInit {
     //   }));
     this.socketXYSubscription = this.socketService.subjectXY.subscribe(xy => {
       xy = JSON.parse(xy);
-      this.drawOnCanvas(xy.prevPos, xy.currentPos, xy.color);
+      this.drawOnCanvas(xy.prevPos, xy.currentPos, xy.color, xy.size);
     });
   }
 
@@ -40,11 +41,12 @@ export class CanvasComponent implements OnInit, OnDestroy, AfterViewInit {
   public onChangeColorHex8(color: string) {
     const hsva = this.cpService.stringToHsva(color, true);
     if (hsva) {
-      console.log(hsva);
-      console.log('aaaaaaaaaa');
       this.selectedColor = this.cpService.outputFormat(hsva, 'hex', null);
-      console.log(this.selectedColor);
     }
+  }
+
+  public onChangeSize(event: any){
+    this.selectedSize = event.value;
   }
 
   ngOnDestroy() {
@@ -77,7 +79,7 @@ export class CanvasComponent implements OnInit, OnDestroy, AfterViewInit {
 
 
     // set some default properties about the line
-    this.cx.lineWidth = 3;
+    this.cx.lineWidth = this.selectedSize;
     this.cx.lineCap = 'round';
     this.cx.strokeStyle = this.selectedColor;
 
@@ -85,7 +87,7 @@ export class CanvasComponent implements OnInit, OnDestroy, AfterViewInit {
 
     for(let i = 0; i < this.socketService.initCanvasData.length; i++){
       let toDraw = JSON.parse(this.socketService.initCanvasData[i]);
-      this.drawOnCanvas(toDraw.prevPos, toDraw.currentPos, toDraw.color);
+      this.drawOnCanvas(toDraw.prevPos, toDraw.currentPos, toDraw.color, toDraw.size);
     }
   }
 
@@ -122,13 +124,14 @@ export class CanvasComponent implements OnInit, OnDestroy, AfterViewInit {
         this.socketService.subjectXY.next({
           prevPos,
           currentPos,
-          color: this.selectedColor
+          color: this.selectedColor,
+          size: this.selectedSize
         });
-        this.drawOnCanvas(prevPos, currentPos, this.selectedColor);
+        this.drawOnCanvas(prevPos, currentPos, this.selectedColor, this.selectedSize);
       });
   }
 
-  private drawOnCanvas(prevPos: { x: number, y: number }, currentPos: { x: number, y: number }, color) {
+  private drawOnCanvas(prevPos: { x: number, y: number }, currentPos: { x: number, y: number }, color, size) {
     // in case the context is not set
     if (!this.cx) { return; }
 
@@ -144,6 +147,7 @@ export class CanvasComponent implements OnInit, OnDestroy, AfterViewInit {
 
       // this.cx.fillStyle = color;
       this.cx.strokeStyle = color;
+      this.cx.lineWidth = size;
 
       // strokes the current path with the styles we set earlier
       this.cx.stroke();

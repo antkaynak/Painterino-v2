@@ -6,7 +6,6 @@ const path = require('path');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
-const http = require('http');
 
 const {mongoose} = require('./db/mongoose');
 const indexRouter = require('./routes/index');

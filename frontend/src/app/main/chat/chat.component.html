@@ -1,13 +1,13 @@
-<div style="height: 90%; background-color: #323232">
-  <mat-list style="overflow-x: hidden; overflow-y: auto; -ms-word-break: break-all;word-break: break-all;: break-word; white-space: pre-line">
+<div style="background-color: #323232">
+  <mat-list #chatList style="height: 90vh;overflow-x: hidden; overflow-y: auto; -ms-word-break: break-all;word-break: break-all;: break-word; white-space: pre-line">
     <mat-list-item *ngFor="let message of messages" style="color:white">
       {{message}}
     </mat-list-item>
   </mat-list>
-</div>
-<div style="background-color: #323232">
+
   <mat-form-field>
   <input matInput #chat id="chat" type="text" (keyup.enter)="sendMessage(chat)" style="width: 70%; color:white">
   </mat-form-field>
   <button (click)="sendMessage(chat)" mat-raised-button style="width: 25%">Send</button>
+
 </div>

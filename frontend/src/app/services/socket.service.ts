@@ -20,14 +20,13 @@ export class SocketService {
   subjectXY: Subject<any>;
   initCanvasData;
   initUserList;
+  initChat;
 
   private url = 'http://localhost:3000';
   // Our socket connection
   private socket;
 
   private room: { roomName: null, roomPassword: null };
-
-  private userName: string = 'admin';
 
   constructor(private http: HttpClient, private router: Router) { }
 
@@ -66,11 +65,10 @@ export class SocketService {
 
   sendToChat(data){
     return this.socket.emit('createMessage', JSON.stringify(data), function (error){
-      console.log('callback');
       if(error){
-        return false;
+        console.log(error);
+        alert('An error occurred sending message to the chat.');
       }
-      return true;
     });
   }
 
@@ -91,6 +89,7 @@ export class SocketService {
       if(data.status === 'success'){
         this.initCanvasData = data.game.canvasData;
         this.initUserList = data.game.activeUserList;
+        this.initChat = data.game.chatData;
         // We define our observable which will observe any incoming messages
         // from our socket.io server.
         let observable = new Observable(observer => {
@@ -144,6 +143,7 @@ export class SocketService {
       if(data.status === 'success'){
         this.initCanvasData = data.game.canvasData;
         this.initUserList = data.game.activeUserList;
+        this.initChat = data.game.chatData;
         // We define our observable which will observe any incoming messages
         // from our socket.io server.
         let observable = new Observable(observer => {

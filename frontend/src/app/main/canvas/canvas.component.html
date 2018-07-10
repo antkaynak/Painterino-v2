@@ -3,11 +3,22 @@
     <canvas #canvas style="background-color: white"></canvas>
   </div>
   <div fxFlex="10%">
-    <input class="color-picker"
-           [cpDisableInput]="true"
-           [(colorPicker)]="selectedColor"
-           (colorPickerChange)="onChangeColorHex8($event)"
-           [cpPosition]="'top'" [style.background]="color"/>
+    <div fxLayout="row" fxLayoutAlign="center" class="tool-box">
+      <div fxFlex="20%">
+        <label id="color-picker-wrapper"><input
+                              class="color-picker"
+                             [cpDisableInput]="true"
+                             [(colorPicker)]="selectedColor"
+                             (colorPickerChange)="onChangeColorHex8($event)"
+                             [cpPosition]="'top'" [style.background]="selectedColor"
+                              [readonly]="true"
+        /></label>
+      </div>
+      <div fxFlex="20%">
+        <mat-slider thumbLabel min="1" max="48" step="2" value="3" (input)="onChangeSize($event)"></mat-slider>
+      </div>
+
+    </div>
   </div>
 
 </div>

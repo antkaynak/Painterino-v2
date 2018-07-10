@@ -1,8 +1,6 @@
 import {Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {ChatMessage, SocketService} from "../../services/socket.service";
 import {Subscription} from "rxjs/internal/Subscription";
-import {Subject} from "rxjs/index";
-import {map} from "rxjs/operators";
 import * as moment from 'moment';
 
 @Component({
@@ -11,6 +9,8 @@ import * as moment from 'moment';
   styleUrls: ['./chat.component.css']
 })
 export class ChatComponent implements OnInit, OnDestroy {
+
+  @ViewChild('chatList', {read: ElementRef}) public chatList : ElementRef;
 
   // socketMessage : Subject<any>;
   socketMessageSubscription: Subscription;
@@ -27,15 +27,36 @@ export class ChatComponent implements OnInit, OnDestroy {
 
     this.socketMessageSubscription = this.socketService.connectToChat().subscribe((data : ChatMessage) => {
       this.pushToMessage(data);
+      this.scrollChat();
     });
   }
 
   ngOnInit() {
+    const initChat = this.socketService.initChat;
+    for(let i = 0; i < initChat.length; i++){
+      let toChat = JSON.parse(initChat[i]);
+      this.pushToMessage(toChat);
+    }
   }
 
   ngOnDestroy() {
     if(this.socketMessageSubscription != null) {
       this.socketMessageSubscription.unsubscribe();
+    }
+  }
+
+  scrollChat(){
+    const clientHeight = this.chatList.nativeElement.clientHeight;
+    const scrollTop = this.chatList.nativeElement.scrollTop;
+    const scrollHeight = this.chatList.nativeElement.scrollHeight;
+    const scrollIndex = 200; //A constant to fix scroll detection
+
+    if (clientHeight + scrollTop + scrollIndex >= scrollHeight) {
+
+      console.log(scrollTop);
+      console.log(scrollHeight);
+      this.chatList.nativeElement.scrollTop = scrollHeight;
+      console.log(this.chatList.nativeElement.scrollTop);
     }
   }
 
@@ -56,6 +77,7 @@ export class ChatComponent implements OnInit, OnDestroy {
     if(success){
       chat.value = '';
       this.pushToMessage(message);
+      this.scrollChat();
     }
   }
 

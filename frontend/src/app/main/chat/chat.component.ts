@@ -19,24 +19,15 @@ export class ChatComponent implements OnInit, OnDestroy {
 
 
   constructor(private socketService: SocketService) {
-    // this.socketMessage = <Subject<any>>socketService
-    //   .connectToChat().pipe(map((response: any): any => {
-    //     return response;
-    //   }));
-    // this.socketMessageSubscription = this.socketMessage.subscribe(msg => {
-    //   this.messages.push(msg);
-    // });
-
     this.socketMessageSubscription = this.socketService.connectToChat().subscribe((data : ChatMessage) => {
       this.pushToMessage(data);
     });
   }
 
   ngOnInit() {
-    this.chatData = this.socketService.gameState.game.chatData;
-
-    for(let i = 0; i < this.chatData.length; i++){
-      let toChat = JSON.parse(this.chatData[i]);
+    const initChatData = this.socketService.gameState.game.chatData;
+    for(let i = 0; i < initChatData.length; i++){
+      let toChat = JSON.parse(initChatData[i]);
       this.pushToMessage(toChat);
     }
   }

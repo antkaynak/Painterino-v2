@@ -28,12 +28,16 @@ export class WaitComponent implements OnInit, OnDestroy {
       this.gameStateSubscription = this.socketService.createGameStateObservable().subscribe( (gameState:any) =>{
         console.log("wait component line 28");
         console.log(gameState);
-        this.activeUserList = gameState.game.userList;
+        this.socketService.gameState = gameState;
+        console.log('flag, game starting');
+        console.log(this.socketService.gameState);
+        console.log(gameState);
         if(gameState.game.status === 1){
 
           //TODO temporary bug fix
-          this.socketService.gameState.game.userList = gameState.game.userList;
-          
+          // this.socketService.gameState.game.userList = gameState.game.userList;
+
+
           this.router.navigate(['/game']);
         }
       });

@@ -21,7 +21,7 @@ export class CanvasComponent implements OnInit, OnDestroy, AfterViewInit {
   socketXYSubscription: Subscription = null;
   gameStateSubscription: Subscription = null;
   canvasData = [];
-  activeTurnSocketId = "abc";
+  activeTurnSocketId;
 
   activeWord = "error";
 
@@ -36,8 +36,14 @@ export class CanvasComponent implements OnInit, OnDestroy, AfterViewInit {
     //     return response;
     //   }));
     this.canvasData = this.socketService.gameState.game.canvasData;
+    this.activeWord = this.socketService.gameState.game.activeWord;
+    this.activeTurnSocketId = this.socketService.gameState.game.activeTurnSocketId;
+    
     this.gameStateSubscription = this.socketService.createGameStateObservable().subscribe((gameState:any) => {
+      console.log("canvas component line 42");
+      console.log(gameState);
       this.activeWord = gameState.game.activeWord;
+      this.activeTurnSocketId = gameState.game.activeTurnSocketId;
     });
 
     if(this.socketService.subjectXY !== undefined || this.socketService.subjectXY !== null){
@@ -46,8 +52,6 @@ export class CanvasComponent implements OnInit, OnDestroy, AfterViewInit {
         this.drawOnCanvas(xy.prevPos, xy.currentPos, xy.color, xy.size);
       });
     }
-
-
 
   }
 
@@ -129,7 +133,11 @@ export class CanvasComponent implements OnInit, OnDestroy, AfterViewInit {
       }))
       .subscribe((res: [MouseEvent, MouseEvent]) => {
         //check if the user can draw in this turn
-        if(this.socketService.socketId !== this.activeTurnSocketId){
+        console.log(this.socketService.socket.id);
+        console.log(this.socketService.socket);
+        console.log(this.activeTurnSocketId);
+        console.log(this.activeWord);
+        if(this.socketService.socket.id !== this.activeTurnSocketId){
           return;
         }
 

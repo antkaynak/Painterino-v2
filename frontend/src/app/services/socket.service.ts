@@ -19,14 +19,13 @@ export class SocketService {
   //TODO function names and their order
 
   subjectXY: Subject<any>;
-  socketId = "abc";
 
   gameState;
   // gameStateSubscription: Subscription;
 
   private url = 'http://localhost:3000';
   // Our socket connection
-  private socket;
+  socket;
 
   private room: { roomName: null, roomPassword: null };
 
@@ -40,18 +39,6 @@ export class SocketService {
   getActiveRooms(){
     return timer(0, 10000)
       .pipe(flatMap(() => this.http.get(this.url+'/lobby/rooms')));
-  }
-
-  getActiveUsers(){
-    return new Observable(observer => {
-      this.socket.on('updateUserList', (data)=>{
-        observer.next(data);
-      });
-      return ()=> {
-        //TODO fix leaking issues
-        // this.socket.disconnect();
-      }
-    });
   }
 
 
@@ -81,6 +68,7 @@ export class SocketService {
       return;
     }
     this.socket = io(this.url);
+
 
     this.createGameStateObservable().pipe(
       first(),

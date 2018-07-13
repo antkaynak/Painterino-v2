@@ -98,6 +98,22 @@ sockets.init = function (server) {
                                 });
                         });
 
+                    }else{
+                        io.to(params.room.roomName).emit('gameState',
+                            {
+                                status: 'success',
+                                game:{
+                                    status: dsRoom.gameState.status,
+                                    _turn: dsRoom.gameState._turn,
+                                    currentTurn: dsRoom.gameState.currentTurn,
+                                    activeTurnSocketId: null,
+                                    //TODO only current drawer should receive activeWord
+                                    activeWord: null,
+                                    canvasData: [],
+                                    chatData: [],
+                                    userList: dsRoom.getActiveUserNames()
+                                }
+                            });
                     }
                 }else{
 
@@ -108,11 +124,11 @@ sockets.init = function (server) {
                                 status: dsRoom.gameState.status,
                                 _turn: dsRoom.gameState._turn,
                                 currentTurn: dsRoom.gameState.currentTurn,
-                                activeTurnSocketId: null,
+                                activeTurnSocketId: dsRoom.gameState.activeTurnSocket.id,
                                 //TODO only current drawer should receive activeWord
-                                activeWord: null,
-                                canvasData: [],
-                                chatData: [],
+                                activeWord: dsRoom.gameState.activeWord,
+                                canvasData: dsRoom.gameState.canvasData,
+                                chatData: dsRoom.gameState.chatData,
                                 userList: dsRoom.getActiveUserNames()
                             }
                         });

@@ -1,6 +1,6 @@
 <div style="background-color: #323232">
-  <mat-list #chatList style="height: 90vh;overflow-x: hidden; overflow-y: auto; -ms-word-break: break-all;word-break: break-all;: break-word; white-space: pre-line">
-    <mat-list-item *ngFor="let message of messages" style="color:white">
+  <mat-list #chatList [scrollTop]="chatList.scrollHeight" style="height: 90vh;overflow-x: hidden; overflow-y: auto; -ms-word-break: break-all;word-break: break-all;: break-word; white-space: pre-line">
+    <mat-list-item *ngFor="let message of chatData" style="color:white">
       {{message}}
     </mat-list-item>
   </mat-list>

@@ -15,10 +15,10 @@ export class UserListComponent implements OnInit, OnDestroy {
   constructor(private socketService: SocketService) { }
 
   ngOnInit() {
-    this.userList = this.socketService.initUserList;
-    this.userListSubscription = this.socketService.getActiveUsers().subscribe(data=>{
-      console.log(data);
-      this.userList = data;
+    this.userList = this.socketService.gameState.game.userList;
+    this.userListSubscription = this.socketService.createGameStateObservable().subscribe((gameState:any)=>{
+      console.log("user-list 22 " ,gameState);
+      this.userList = gameState.game.userList;
     });
   }
 

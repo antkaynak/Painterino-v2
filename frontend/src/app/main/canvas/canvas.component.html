@@ -18,6 +18,8 @@
         <mat-slider thumbLabel min="1" max="48" step="2" value="3" (input)="onChangeSize($event)"></mat-slider>
       </div>
 
+      <div fxFlex="20%" style="font-size: 1.75em"
+           *ngIf="activeWord !== undefined">{{activeWord}}</div>
     </div>
   </div>
 

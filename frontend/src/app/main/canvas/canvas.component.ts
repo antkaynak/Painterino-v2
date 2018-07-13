@@ -7,6 +7,7 @@ import {Subject} from "rxjs";
 import { map } from 'rxjs/operators';
 import {Subscription} from "rxjs/internal/Subscription";
 import {ColorPickerService} from "ngx-color-picker";
+import {Router} from "@angular/router";
 
 
 @Component({
@@ -17,21 +18,37 @@ import {ColorPickerService} from "ngx-color-picker";
 export class CanvasComponent implements OnInit, OnDestroy, AfterViewInit {
 
   // socketXY : Subject<any>;
-  socketXYSubscription: Subscription;
+  socketXYSubscription: Subscription = null;
+  gameStateSubscription: Subscription = null;
+  canvasData = [];
+  activeTurnSocketId = "abc";
+
+  activeWord = "error";
+
 
 
   public selectedColor: string = '#000000';
   public selectedSize: number = 3;
 
-  constructor(private socketService: SocketService, private cpService: ColorPickerService) {
+  constructor(private socketService: SocketService, private router: Router, private cpService: ColorPickerService) {
     // this.socketXY = <Subject<any>>socketService
     //   .connect().pipe(map((response: any): any => {
     //     return response;
     //   }));
-    this.socketXYSubscription = this.socketService.subjectXY.subscribe(xy => {
-      xy = JSON.parse(xy);
-      this.drawOnCanvas(xy.prevPos, xy.currentPos, xy.color, xy.size);
+    this.canvasData = this.socketService.gameState.game.canvasData;
+    this.gameStateSubscription = this.socketService.createGameStateObservable().subscribe((gameState:any) => {
+      this.activeWord = gameState.game.activeWord;
     });
+
+    if(this.socketService.subjectXY !== undefined || this.socketService.subjectXY !== null){
+      this.socketXYSubscription = this.socketService.subjectXY.subscribe(xy => {
+        xy = JSON.parse(xy);
+        this.drawOnCanvas(xy.prevPos, xy.currentPos, xy.color, xy.size);
+      });
+    }
+
+
+
   }
 
   ngOnInit() {
@@ -52,6 +69,9 @@ export class CanvasComponent implements OnInit, OnDestroy, AfterViewInit {
   ngOnDestroy() {
     if(this.socketXYSubscription != null){
       this.socketXYSubscription.unsubscribe();
+    }
+    if(this.gameStateSubscription != null){
+      this.gameStateSubscription.unsubscribe();
     }
   }
 
@@ -85,8 +105,8 @@ export class CanvasComponent implements OnInit, OnDestroy, AfterViewInit {
 
     this.captureEvents(canvasEl);
 
-    for(let i = 0; i < this.socketService.initCanvasData.length; i++){
-      let toDraw = JSON.parse(this.socketService.initCanvasData[i]);
+    for(let i = 0; i < this.canvasData.length; i++){
+      let toDraw = JSON.parse(this.canvasData[i]);
       this.drawOnCanvas(toDraw.prevPos, toDraw.currentPos, toDraw.color, toDraw.size);
     }
   }
@@ -108,6 +128,11 @@ export class CanvasComponent implements OnInit, OnDestroy, AfterViewInit {
           pairwise())
       }))
       .subscribe((res: [MouseEvent, MouseEvent]) => {
+        //check if the user can draw in this turn
+        if(this.socketService.socketId !== this.activeTurnSocketId){
+          return;
+        }
+
         const rect = canvasEl.getBoundingClientRect();
 
         // previous and current position with the offset

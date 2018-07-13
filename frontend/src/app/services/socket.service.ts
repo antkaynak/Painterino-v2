@@ -2,8 +2,9 @@ import { Injectable } from '@angular/core';
 import { Observable, Subject, timer } from 'rxjs';
 import * as io from 'socket.io-client';
 import {HttpClient} from "@angular/common/http";
-import {flatMap, map} from "rxjs/operators";
+import {first, flatMap, map, tap} from "rxjs/operators";
 import {Router} from "@angular/router";
+import {Subscription} from "rxjs/internal/Subscription";
 
 export interface ChatMessage {
   message:{
@@ -18,9 +19,10 @@ export class SocketService {
   //TODO function names and their order
 
   subjectXY: Subject<any>;
-  initCanvasData;
-  initUserList;
-  initChat;
+  socketId = "abc";
+
+  gameState;
+  // gameStateSubscription: Subscription;
 
   private url = 'http://localhost:3000';
   // Our socket connection
@@ -46,7 +48,8 @@ export class SocketService {
         observer.next(data);
       });
       return ()=> {
-        this.socket.disconnect();
+        //TODO fix leaking issues
+        // this.socket.disconnect();
       }
     });
   }
@@ -72,110 +75,83 @@ export class SocketService {
     });
   }
 
-  createRoom(): Subject<MessageEvent> {
+  connectRoom(type): Subject<MessageEvent> {
     if(!this.room || this.room == null || this.room == undefined){
       console.log('No room selected.');
       return;
     }
     this.socket = io(this.url);
 
-    this.socket.emit('create', { room:this.room, token: localStorage.getItem("id_token")}, function(error){
-      if(error){
-        console.log(error);
-      }
-    });
-
-    this.socket.on('createResponse', (data)=> {
-      if(data.status === 'success'){
-        this.initCanvasData = data.game.canvasData;
-        this.initUserList = data.game.activeUserList;
-        this.initChat = data.game.chatData;
-        // We define our observable which will observe any incoming messages
-        // from our socket.io server.
-        let observable = new Observable(observer => {
-          this.socket.on('receiveXY', (data) => {
-            observer.next(data);
+    this.createGameStateObservable().pipe(
+      first(),
+      tap((gameState:any)=> {
+        this.gameState = gameState;
+        if(gameState.status === 'success'){
+          // We define our observable which will observe any incoming messages
+          // from our socket.io server.
+          let observable = new Observable(observer => {
+            this.socket.on('receiveXY', (data) => {
+              observer.next(data);
+            });
+            return () => {
+              this.socket.disconnect();
+            }
           });
-          return () => {
-            this.socket.disconnect();
+
+          // We define our Observer which will listen to messages
+          // from our other components and send messages back to our
+          // socket server whenever the `next()` method is called.
+          let observer = {
+            next: (data: Object) => {
+              this.socket.emit('createXY', JSON.stringify(data));
+            },
+          };
+
+          // we return our Rx.Subject which is a combination
+          // of both an observer and observable.
+          this.subjectXY =  Subject.create(observer, observable).pipe(map((response: any): any => {
+            return response;
+          }));
+
+          if(this.gameState.game.status === 1){
+            this.router.navigate(['/game']);
+          }else{
+
+            this.router.navigate(['/lobby']);
           }
-        });
 
-        // We define our Observer which will listen to messages
-        // from our other components and send messages back to our
-        // socket server whenever the `next()` method is called.
-        let observer = {
-          next: (data: Object) => {
-            this.socket.emit('createXY', JSON.stringify(data));
-          },
-        };
+        }else if(gameState.status === 'fail'){
+          alert('An error occurred.');
+        }
+      })).subscribe(data => console.log('leaking data!!!!   ', data));
 
-        // we return our Rx.Subject which is a combination
-        // of both an observer and observable.
-        this.subjectXY =  Subject.create(observer, observable).pipe(map((response: any): any => {
-          return response;
-        }));
-        this.router.navigate(['/room/'+this.room.roomName]);
-      }else if(data.status === 'fail'){
-        alert('An error occurred.');
-      }
-    });
-
+    if(type === 'create'){
+      this.socket.emit('create', { room:this.room, token: localStorage.getItem("id_token")}, function(error){
+        if(error){
+          console.log(error);
+        }
+      });
+    }else if(type === 'join'){
+      this.socket.emit('join', { room:this.room, token: localStorage.getItem("id_token")}, function(error){
+        if(error){
+          console.log(error);
+        }
+      });
+    }else{
+      alert('error');
+    }
 
   }
 
-  //TODO make joinRoom and createRoom functions shorter
 
-  joinRoom(): Subject<MessageEvent> {
-    if(!this.room || this.room == null || this.room == undefined){
-      console.log('No room selected.');
-      return;
-    }
-    this.socket = io(this.url);
-
-    this.socket.emit('join', { room:this.room, token: localStorage.getItem("id_token")}, function(error){
-      if(error){
-        console.log(error);
-      }
+  createGameStateObservable(){
+    return new Observable( observer => {
+      this.socket.on('gameState', (gameState) => {
+        console.log('createGameStateObservable');
+        console.log(gameState);
+        observer.next(gameState);
+      })
     });
-
-    this.socket.on('joinResponse', (data)=> {
-      if(data.status === 'success'){
-        this.initCanvasData = data.game.canvasData;
-        this.initUserList = data.game.activeUserList;
-        this.initChat = data.game.chatData;
-        // We define our observable which will observe any incoming messages
-        // from our socket.io server.
-        let observable = new Observable(observer => {
-          this.socket.on('receiveXY', (data) => {
-            observer.next(data);
-          });
-          return () => {
-            this.socket.disconnect();
-          }
-        });
-
-        // We define our Observer which will listen to messages
-        // from our other components and send messages back to our
-        // socket server whenever the `next()` method is called.
-        let observer = {
-          next: (data: Object) => {
-            this.socket.emit('createXY', JSON.stringify(data));
-          },
-        };
-
-        // we return our Rx.Subject which is a combination
-        // of both an observer and observable.
-        this.subjectXY =  Subject.create(observer, observable).pipe(map((response: any): any => {
-          return response;
-        }));
-
-        this.router.navigate(['/room/'+this.room.roomName]);
-      }else if(data.status === 'fail'){
-        alert('An error occurred.');
-      }
-    });
-
   }
 
 

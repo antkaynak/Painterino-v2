@@ -14,7 +14,9 @@ export class ChatComponent implements OnInit, OnDestroy {
 
   // socketMessage : Subject<any>;
   socketMessageSubscription: Subscription;
-  messages: Array<any> = [];
+
+  chatData: Array<any> = [];
+
 
   constructor(private socketService: SocketService) {
     // this.socketMessage = <Subject<any>>socketService
@@ -27,14 +29,14 @@ export class ChatComponent implements OnInit, OnDestroy {
 
     this.socketMessageSubscription = this.socketService.connectToChat().subscribe((data : ChatMessage) => {
       this.pushToMessage(data);
-      this.scrollChat();
     });
   }
 
   ngOnInit() {
-    const initChat = this.socketService.initChat;
-    for(let i = 0; i < initChat.length; i++){
-      let toChat = JSON.parse(initChat[i]);
+    this.chatData = this.socketService.gameState.game.chatData;
+
+    for(let i = 0; i < this.chatData.length; i++){
+      let toChat = JSON.parse(this.chatData[i]);
       this.pushToMessage(toChat);
     }
   }
@@ -49,12 +51,13 @@ export class ChatComponent implements OnInit, OnDestroy {
     const clientHeight = this.chatList.nativeElement.clientHeight;
     const scrollTop = this.chatList.nativeElement.scrollTop;
     const scrollHeight = this.chatList.nativeElement.scrollHeight;
-    const scrollIndex = 200; //A constant to fix scroll detection
+    const scrollIndex = 150; //A constant to fix scroll detection
 
     if (clientHeight + scrollTop + scrollIndex >= scrollHeight) {
 
       console.log(scrollTop);
       console.log(scrollHeight);
+      console.log(this.chatList);
       this.chatList.nativeElement.scrollTop = scrollHeight;
       console.log(this.chatList.nativeElement.scrollTop);
     }
@@ -84,6 +87,7 @@ export class ChatComponent implements OnInit, OnDestroy {
   pushToMessage(message: ChatMessage){
     const date = moment(message.message.createdAt).format('h:mm a');
     const pushMessage = `${date} : ${message.message.text}`;
-    this.messages.push(pushMessage);
+    this.chatData.push(pushMessage);
+    this.scrollChat();
   }
 }

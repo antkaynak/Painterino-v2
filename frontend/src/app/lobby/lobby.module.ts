@@ -12,6 +12,7 @@ import {RegisterComponent} from "./auth/register/register.component";
 import {ReactiveFormsModule} from "@angular/forms";
 import { CreateComponent } from './room-list/create/create.component';
 import { JoinComponent } from './room-list/join/join.component';
+import { WaitComponent } from './wait/wait.component';
 
 
 @NgModule({
@@ -28,7 +29,8 @@ import { JoinComponent } from './room-list/join/join.component';
     LoginComponent,
     RegisterComponent,
     CreateComponent,
-    JoinComponent
+    JoinComponent,
+    WaitComponent
   ],entryComponents: [
     CreateComponent,
     JoinComponent

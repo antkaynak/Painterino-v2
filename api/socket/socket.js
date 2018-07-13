@@ -1,29 +1,25 @@
-
 const express = require('express');
 const router = express.Router();
 
-const {Room, ActiveRoomList, ActiveUser} = require('../model/rooms');
+const {Room, ActiveRoomList} = require('../model/rooms');
 const {User} = require('../model/users');
+const {Word} = require('../model/words');
 
 
 let sockets = {};
 
-sockets.init = function(server){
+sockets.init = function (server) {
     let activeRoomList = new ActiveRoomList();
 
     const io = require('socket.io').listen(server);
     io.on('connection', (socket) => {
         console.log('A new user is connected.');
 
-        socket.on('join', (params, callback)=>{
-            console.log(params);
-            if(typeof params.token !== 'string' || typeof params.room.roomName !== 'string'
-                || params.token.trim().length === 0 || params.room.roomName.trim().length === 0){
+        socket.on('join', (params, callback) => {
+            if (typeof params.token !== 'string' || typeof params.room.roomName !== 'string'
+                || params.token.trim().length === 0 || params.room.roomName.trim().length === 0) {
                 return callback('Required params! *token *room { roomName }');
             }
-
-            console.log('params.token');
-            console.log(params.token);
 
             User.findByToken(params.token).then((user) => {
                 if (!user) {
@@ -35,53 +31,131 @@ sockets.init = function(server){
                 console.log(dsRoom);
                 console.log('*********************************************');
 
-                if(dsRoom){
-                    let paramPassword = params.room.roomPassword === null ? null: params.room.roomPassword.trim();
+                if (dsRoom) {
+                    let paramPassword = params.room.roomPassword === null ? null : params.room.roomPassword.trim();
                     paramPassword = paramPassword === '' ? null : paramPassword;
-                    if(dsRoom.roomPassword !== paramPassword) {
+                    if (dsRoom.roomPassword !== paramPassword) {
                         console.log('flag2');
-                        socket.emit('joinResponse', {
-                            status: 'fail'
+                        socket.emit('gameState', {
+                            status: 'fail',
+                            game: null
                         });
                         return callback('Room password is invalid.');
                     }
-                }else{
-                    socket.emit('joinResponse', {
-                        status: 'fail'
+                } else {
+                    socket.emit('gameState', {
+                        status: 'fail',
+                        game: null
                     });
                     return callback('Room does not exist!');
                 }
 
-                socket.join(params.room.roomName);
-                dsRoom.activeUserList.addUser(new ActiveUser(socket.id, user._id, params.room.roomName, user.username));
-                socket.emit('joinResponse', {
-                    status: 'success',
-                    game: {
-                        activeUserList: activeRoomList.getRoom(params.room.roomName).getActiveUserNames(),
-                        canvasData: activeRoomList.getRoom(params.room.roomName).canvasData,
-                        chatData: activeRoomList.getRoom(params.room.roomName).chatData
-                    }
-                });
-
+                socket['userName'] = user.username;
                 socket['roomName'] = params.room.roomName;
                 socket['token'] = params.token;
-                // userList.removeUser(socket.id);
-                // userList.addUser(new User(socket.id,params.userName,params.room));
 
-                socket.broadcast.to(params.room.roomName).emit('updateUserList', activeRoomList.getRoom(socket['roomName']).getActiveUserNames());
+                socket.join(params.room.roomName);
 
+                dsRoom.addUser(socket);
+
+                // socket.broadcast.to(params.room.roomName).emit('updateUserList', dsRoom.getActiveUserNames());
+
+                //game logic to check if the game should start or not
+
+
+                //TODO move this codebase to separate game logic
+                if(dsRoom.gameState.status === 0){
+                    //TODO fix the hard coded 1
+                    if (dsRoom.userSockets.length > 1) {
+                        console.log("************************************");
+                        console.log("Game Start");
+                        console.log("************************************");
+                        Word.findOneRandom(function (err, result) {
+                            if (err || !result.key) {
+                                //TODO add a fail safe event so that the game cancels on an error.
+                                return;
+                            }
+
+                            console.log(result.key);
+
+                            dsRoom.gameState.activeWord = result.key;
+                            dsRoom.startGame();
+
+                            io.to(params.room.roomName).emit('gameState',
+                                {
+                                    status: 'success',
+                                    game:{
+                                        status: dsRoom.gameState.status,
+                                        _turn: dsRoom.gameState._turn,
+                                        currentTurn: dsRoom.gameState.currentTurn,
+                                        activeTurnSocketId: dsRoom.gameState.activeTurnSocket.id,
+                                        //TODO only current drawer should receive activeWord
+                                        activeWord: dsRoom.gameState.activeWord,
+                                        canvasData: dsRoom.gameState.canvasData,
+                                        chatData: dsRoom.gameState.chatData,
+                                        userList: dsRoom.getActiveUserNames()
+                                    }
+                                });
+                        });
+
+                    }
+                }else{
+
+                    io.to(params.room.roomName).emit('gameState',
+                        {
+                            status: 'success',
+                            game:{
+                                status: dsRoom.gameState.status,
+                                _turn: dsRoom.gameState._turn,
+                                currentTurn: dsRoom.gameState.currentTurn,
+                                activeTurnSocketId: null,
+                                //TODO only current drawer should receive activeWord
+                                activeWord: null,
+                                canvasData: [],
+                                chatData: [],
+                                userList: dsRoom.getActiveUserNames()
+                            }
+                        });
+
+                }
 
             }).catch((e) => {
                 console.log(e);
-                socket.emit('joinResponse', {
-                    status: 'fail'
+                socket.emit('gameState', {
+                    status: 'fail',
+                    game: null
                 });
                 return callback(e);
             });
 
         });
 
-        socket.on('create', (params, callback)=> {
+        // socket.on('gameStatusRequest', (params,callback) => {
+        //     const dsRoom = activeRoomList.getRoom(socket['roomName']);
+        //     console.log('************** FLAG ******************');
+        //     const activeTurnSocketId = dsRoom.gameState.status === 0 ? null : dsRoom.gameState.activeTurnSocket.id;
+        //
+        //     console.log(dsRoom);
+        //     console.log(activeTurnSocketId);
+        //     const gameState = {
+        //         gameState:{
+        //             status: dsRoom.gameState.status,
+        //             _turn: dsRoom.gameState._turn,
+        //             currentTurn: dsRoom.gameState.currentTurn,
+        //             activeTurnSocketId: activeTurnSocketId,
+        //             //TODO only current drawer should receive activeWord
+        //             activeWord: dsRoom.gameState.activeWord,
+        //             canvasData: dsRoom.gameState.canvasData,
+        //             chatData: dsRoom.gameState.chatData
+        //         }
+        //     };
+        //     console.log(gameState);
+        //     socket.to(socket['roomName']).emit('deneme', gameState);
+        //     console.log('emitted');
+        //     callback('emitted');
+        // });
+
+        socket.on('create', (params, callback) => {
             console.log(params);
             if (typeof params.token !== 'string' || typeof params.room.roomName !== 'string'
                 || params.token.trim().length === 0 || params.room.roomName.trim().length === 0) {
@@ -97,42 +171,43 @@ sockets.init = function(server){
                 console.log(dsRoom);
                 console.log('*********************************************');
 
-                if(dsRoom){
-                    socket.emit('createResponse', {
-                        status: 'fail'
+                if (dsRoom) {
+                    socket.emit('gameState', {
+                        status: 'fail',
+                        game: null
                     });
                     return callback('Room already exists!');
                 }
 
-                // let password = '';
-                // if(params.room.roomPassword !== null || params.room.roomPassword !== undefined){
-                //     password = params.room.roomPassword;
-                // }
                 let password = params.room.roomPassword === null ? null : params.room.roomPassword.trim();
                 password = password === '' ? null : password;
                 console.log(password);
                 console.log(params.room.roomPassword);
                 let room = new Room(params.room.roomName, password);
-                room.activeUserList.addUser(new ActiveUser(socket.id, user._id, params.room.roomName, user.username));
+                room.addUser(socket);
                 activeRoomList.addRoom(room);
 
 
                 socket.join(params.room.roomName);
 
-                socket.emit('createResponse', {
-                    status: 'success',
-                    game: {
-                        activeUserList: room.getActiveUserNames(),
-                        // canvas: activeRoomList.getRoom(socket['roomName']).canvasData
-                        canvasData: [],
-                        chatData: []
-                    }
-
-                });
-
+                socket['userName'] = user.username;
                 socket['roomName'] = params.room.roomName;
                 socket['token'] = params.token;
 
+                socket.emit('gameState', {
+                    status: 'success',
+                    game:{
+                        status: room.gameState.status,
+                        _turn: room.gameState._turn,
+                        currentTurn: room.gameState.currentTurn,
+                        activeTurnSocketId: null,
+                        //TODO only current drawer should receive activeWord
+                        activeWord: null,
+                        canvasData: [],
+                        chatData: [],
+                        userList: room.getActiveUserNames()
+                    }
+                });
 
                 // userList.removeUser(socket.id);
                 // userList.addUser(new User(socket.id,params.userName,params.room));
@@ -142,8 +217,9 @@ sockets.init = function(server){
 
             }).catch((e) => {
                 console.log(e);
-                socket.emit('createResponse', {
-                    status: 'fail'
+                socket.emit('gameState', {
+                    status: 'fail',
+                    game: null
                 });
                 return callback(e);
             });
@@ -151,31 +227,47 @@ sockets.init = function(server){
         });
 
         socket.on('disconnect', () => {
-            console.log('An user was disconnected');
+            console.log('A user was disconnected');
+            //TODO check if only a single user is left if so end the game set the game status 0 or 2
             // const user = userList.removeUser(socket.id);
-            if(socket['roomName'] === undefined){
+            if (socket['roomName'] === undefined) {
                 return;
             }
 
-            const room = activeRoomList.getRoom(socket['roomName']);
-            if(room === undefined || room === null){
+            const dsRoom = activeRoomList.getRoom(socket['roomName']);
+            if (dsRoom === undefined || dsRoom === null) {
                 return;
             }
-            const user = room.activeUserList.getUser(socket.id);
-            console.log(user);
-            if(user){
-                // const counter = io.sockets.clients(socket['roomName']).length;
-                if(room.activeUserList.users.length === 1){
+            const user = dsRoom.removeUser(socket);
+            if (user) {
+                if (dsRoom.userSockets.length === 0) {
                     activeRoomList.removeRoom(socket['roomName']);
-                }else{
-                    activeRoomList.getRoom(socket['roomName']).activeUserList.removeUser(socket.id);
-                    io.to(socket['roomName']).emit('updateUserList', activeRoomList.getRoom(socket['roomName']).getActiveUserNames());
+                } else {
+                    io.to(socket['roomName']).emit('gameState', {
+                        status: 'success',
+                        game:{
+                            status: dsRoom.gameState.status,
+                            _turn: dsRoom.gameState._turn,
+                            currentTurn: dsRoom.gameState.currentTurn,
+                            activeTurnSocketId: dsRoom.gameState.activeTurnSocket.id,
+                            //TODO only current drawer should receive activeWord
+                            activeWord: dsRoom.gameState.activeWord,
+                            canvasData: dsRoom.gameState.canvasData,
+                            chatData: dsRoom.gameState.chatData,
+                            userList: dsRoom.getActiveUserNames()
+                        }
+                    });
                 }
             }
         });
 
-        socket.on('createXY', (xy)=>{
-            if(socket['token'] === undefined){
+        socket.on('createXY', (xy) => {
+            if (socket['token'] === undefined ||
+                socket['roomName'] === undefined ||
+
+                //TODO check if this slows the process or should I use socket attributes
+                activeRoomList.getRoom(socket["roomName"]).getUser(socket)
+                !== activeRoomList.getRoom(socket["roomName"]).gameState.activeTurnSocket) {
                 return;
             }
             //send to all but this socket
@@ -183,12 +275,19 @@ sockets.init = function(server){
             socket.broadcast.to(socket['roomName']).emit('receiveXY', xy);
         });
 
-        socket.on('createMessage', (message, callback)=>{
-            if(socket['token'] === undefined){
+        socket.on('createMessage', (message, callback) => {
+            if (socket['token'] === undefined) {
                 return;
             }
+            const room = activeRoomList.getRoom(socket['roomName'])
+            // if(room.gameState.status === 1){
+            //
+            // }
 
-            activeRoomList.getRoom(socket['roomName']).pushChatData(message);
+            if(room.gameState.activeWord === JSON.parse(message).message.text){
+                console.log('YOU WON');
+            }
+            room.pushChatData(message);
             socket.broadcast.to(socket['roomName']).emit('receiveMessage', {
                 message
             });
@@ -196,8 +295,8 @@ sockets.init = function(server){
         });
     });
 
-    router.get('/rooms', (req,res)=>{
-        const list = activeRoomList.getAllActiveRoomNames();
+    router.get('/rooms', (req, res) => {
+        const list = activeRoomList.getActiveRoomNames();
         res.status(200).send(list);
     });
 };

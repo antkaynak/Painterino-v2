@@ -32,7 +32,7 @@ export class CreateComponent implements OnInit {
     const roomName = this.roomForm.controls.roomName.value;
     const roomPassword = this.roomForm.controls.roomPassword.value;
     this.socketService.selectRoom({roomName, roomPassword});
-    this.socketService.createRoom();
+    this.socketService.connectRoom('create');
     this.dialogRef.close();
   }
 

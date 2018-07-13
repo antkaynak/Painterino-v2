@@ -1,4 +1,7 @@
 import { Component, OnInit } from '@angular/core';
+import {SocketService} from "../services/socket.service";
+import {Router} from "@angular/router";
+
 
 @Component({
   selector: 'app-main',
@@ -7,9 +10,12 @@ import { Component, OnInit } from '@angular/core';
 })
 export class MainComponent implements OnInit {
 
-  constructor() { }
+  constructor(private socketService: SocketService, private router: Router) { }
 
   ngOnInit() {
+    if(this.socketService.subjectXY === undefined || this.socketService.subjectXY === null){
+      this.router.navigate(['/rooms']);
+    }
   }
 
 }

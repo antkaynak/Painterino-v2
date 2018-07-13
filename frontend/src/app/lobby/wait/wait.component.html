@@ -1,0 +1,9 @@
+<mat-list class="room-list" style="overflow-y: auto; height: 100%">
+  <mat-list-item *ngFor="let user of activeUserList">
+    <mat-card>
+      <div class="room">
+        {{user}}
+      </div>
+    </mat-card>
+  </mat-list-item>
+</mat-list>

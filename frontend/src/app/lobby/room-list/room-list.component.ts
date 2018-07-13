@@ -13,6 +13,8 @@ import {JoinComponent} from "./join/join.component";
 })
 export class RoomListComponent implements OnInit, OnDestroy {
 
+
+
   activeRooms: any = [];
   activeRoomsSubscription: Subscription;
 
@@ -34,6 +36,7 @@ export class RoomListComponent implements OnInit, OnDestroy {
   }
 
   openCreate() {
+    this.dialog.closeAll();
     const dialogRef = this.dialog.open(CreateComponent, {
       width: '400px'
     });
@@ -44,6 +47,7 @@ export class RoomListComponent implements OnInit, OnDestroy {
   }
 
   openJoin(roomName) {
+    this.dialog.closeAll();
     console.log('hey', roomName);
     const dialogRef = this.dialog.open(JoinComponent, {
       width: '400px',

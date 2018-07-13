@@ -11,6 +11,7 @@ export class AuthGuardService implements CanActivate{
   constructor(private authService : AuthService, private router: Router) { }
 
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean> | Promise<boolean> | boolean {
+    //TODO do not check every time user navigates
     if(this.authService.checkJWT()){
       return this.authService.getUser()
         .pipe(map(res=>{

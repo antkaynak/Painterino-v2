@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const {ObjectID} = require('mongodb');
 const {User} = require('../model/users');
+
 const _ = require('lodash');
 const {authenticate} = require('../middleware/auth');
 
@@ -31,6 +32,8 @@ router.get('/users/me', authenticate, (req, res) => {
 });
 
 router.post('/users/login', (req, res) => {
+
+
     const body = _.pick(req.body, ['email', 'password']);
 
     User.findByCredentials(body.email, body.password).then((user) => {

@@ -78,6 +78,7 @@ class Room{
         this.roomName = roomName;
         this.roomPassword = roomPassword;
         this.userSockets = [];
+        this.randomWords= [];
 
         this.gameState = {
             status: 0,
@@ -90,12 +91,9 @@ class Room{
         };
     }
 
-    onCorretWordGuess(){
-        this.gameState.canvasData = [];
-        this.nextTurn();
-    }
-
-    startGame(){
+    startGame(randomWordArray){
+        this.randomWords = randomWordArray;
+        this.gameState.activeWord = randomWordArray[0].key;
         console.log("startGame method rooms.js");
         this.gameState._turn = this.gameState.currentTurn++ % this.userSockets.length;
         this.gameState.activeTurnSocket = this.userSockets[this.gameState._turn];
@@ -105,6 +103,8 @@ class Room{
     nextTurn(){
         this.gameState._turn = this.gameState.currentTurn++ % this.userSockets.length;
         this.gameState.activeTurnSocket = this.userSockets[this.gameState._turn];
+        this.gameState.canvasData = [];
+        this.gameState.activeWord = this.randomWords[this.gameState._turn].key;
     }
 
     pushCanvasData(xy){

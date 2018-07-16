@@ -31,14 +31,10 @@ export class CanvasComponent implements OnInit, OnDestroy, AfterViewInit {
   public selectedSize: number = 3;
 
   constructor(private socketService: SocketService, private router: Router, private cpService: ColorPickerService) {
-    // this.socketXY = <Subject<any>>socketService
-    //   .connect().pipe(map((response: any): any => {
-    //     return response;
-    //   }));
     this.canvasData = this.socketService.gameState.game.canvasData;
     this.activeWord = this.socketService.gameState.game.activeWord;
     this.activeTurnSocketId = this.socketService.gameState.game.activeTurnSocketId;
-    
+
     this.gameStateSubscription = this.socketService.createGameStateObservable().subscribe((gameState:any) => {
       console.log("canvas component line 42");
       console.log(gameState);
@@ -133,10 +129,6 @@ export class CanvasComponent implements OnInit, OnDestroy, AfterViewInit {
       }))
       .subscribe((res: [MouseEvent, MouseEvent]) => {
         //check if the user can draw in this turn
-        console.log(this.socketService.socket.id);
-        console.log(this.socketService.socket);
-        console.log(this.activeTurnSocketId);
-        console.log(this.activeWord);
         if(this.socketService.socket.id !== this.activeTurnSocketId){
           return;
         }

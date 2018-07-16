@@ -10,6 +10,7 @@ let sockets = {};
 
 sockets.init = function (server) {
     let activeRoomList = new ActiveRoomList();
+    const randomWordCount = 3;
 
     const io = require('socket.io').listen(server);
     io.on('connection', (socket) => {
@@ -70,16 +71,17 @@ sockets.init = function (server) {
                         console.log("************************************");
                         console.log("Game Start");
                         console.log("************************************");
-                        Word.findOneRandom(function (err, result) {
-                            if (err || !result.key) {
+
+                        Word.findRandom({}, {}, {limit: randomWordCount},function (err, result) {
+                            if (err || !result || result.length < randomWordCount) {
                                 //TODO add a fail safe event so that the game cancels on an error.
                                 return;
                             }
 
-                            console.log(result.key);
+                            console.log(result);
 
-                            dsRoom.gameState.activeWord = result.key;
-                            dsRoom.startGame();
+
+                            dsRoom.startGame(result);
 
                             io.to(params.room.roomName).emit('gameState',
                                 {
@@ -295,14 +297,37 @@ sockets.init = function (server) {
             if (socket['token'] === undefined) {
                 return;
             }
-            const room = activeRoomList.getRoom(socket['roomName'])
+            const room = activeRoomList.getRoom(socket['roomName']);
             // if(room.gameState.status === 1){
             //
             // }
 
-            if(room.gameState.activeWord === JSON.parse(message).message.text){
-                console.log('YOU WON');
+            if(room.gameState.activeWord === JSON.parse(message).message.text
+             && room.gameState.activeTurnSocket !== socket){
+                console.log('*****************************************');
+                console.log(activeRoomList.getRoom(socket['roomName']).getUser(socket).userName + ' has WON!');
+                console.log('*****************************************');
+
+                //TODO increase score for the winning socket
+                room.nextTurn();
+
+                io.to(socket['roomName']).emit('gameState',
+                    {
+                        status: 'success',
+                        game:{
+                            status: room.gameState.status,
+                            _turn: room.gameState._turn,
+                            currentTurn: room.gameState.currentTurn,
+                            activeTurnSocketId: room.gameState.activeTurnSocket.id,
+                            //TODO only current drawer should receive activeWord
+                            activeWord: room.gameState.activeWord,
+                            canvasData: room.gameState.canvasData,
+                            chatData: room.gameState.chatData,
+                            userList: room.getActiveUserNames()
+                        }
+                    });
             }
+
             room.pushChatData(message);
             socket.broadcast.to(socket['roomName']).emit('receiveMessage', {
                 message

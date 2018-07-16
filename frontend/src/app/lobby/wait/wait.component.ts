@@ -33,11 +33,6 @@ export class WaitComponent implements OnInit, OnDestroy {
         console.log(this.socketService.gameState);
         console.log(gameState);
         if(gameState.game.status === 1){
-
-          //TODO temporary bug fix
-          // this.socketService.gameState.game.userList = gameState.game.userList;
-
-
           this.router.navigate(['/game']);
         }
       });
@@ -48,6 +43,9 @@ export class WaitComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
+    // if(this.socketService.socket !== undefined){
+    //   this.socketService.socket.disconnect();
+    // }
 
     if(this.gameStateSubscription != null){
       this.gameStateSubscription.unsubscribe();

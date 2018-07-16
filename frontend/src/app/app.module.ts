@@ -15,6 +15,7 @@ import {NonAuthGuardService} from "./services/non-auth-guard.service";
 import {HTTP_INTERCEPTORS, HttpClientModule} from "@angular/common/http";
 import {AuthInterceptorService} from "./services/auth-interceptor.service";
 import {MAT_DIALOG_DEFAULT_OPTIONS} from "@angular/material";
+import {LobbyLeaveGuardService} from "./services/lobby-leave-guard.service";
 
 
 
@@ -38,7 +39,7 @@ import {MAT_DIALOG_DEFAULT_OPTIONS} from "@angular/material";
       multi: true
     },
     {provide: MAT_DIALOG_DEFAULT_OPTIONS, useValue: {hasBackdrop: false}},
-    SocketService, AuthService, AuthGuardService, NonAuthGuardService],
+    SocketService, AuthService, AuthGuardService, NonAuthGuardService, LobbyLeaveGuardService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

@@ -40,6 +40,12 @@ export class CanvasComponent implements OnInit, OnDestroy, AfterViewInit {
       console.log(gameState);
       this.activeWord = gameState.game.activeWord;
       this.activeTurnSocketId = gameState.game.activeTurnSocketId;
+
+      if(gameState.game.canvasData.length < 1){
+        this.canvasData = [];
+        this.clearCanvas();
+      }
+
     });
 
     if(this.socketService.subjectXY !== undefined || this.socketService.subjectXY !== null){
@@ -154,6 +160,10 @@ export class CanvasComponent implements OnInit, OnDestroy, AfterViewInit {
         });
         this.drawOnCanvas(prevPos, currentPos, this.selectedColor, this.selectedSize);
       });
+  }
+
+  private clearCanvas(){
+    this.cx.clearRect(0,0,this.canvasDiv.nativeElement.offsetWidth, this.canvasDiv.nativeElement.offsetHeight);
   }
 
   private drawOnCanvas(prevPos: { x: number, y: number }, currentPos: { x: number, y: number }, color, size) {

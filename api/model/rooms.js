@@ -3,75 +3,6 @@
 //a data structure to store active users and their information about
 //which room they are in and their names
 
-
-// //TODO should I remove this class and directly use socket object and
-// //TODO add properties to it ( e.g token roomName userName on the socket['key'] )
-// class ActiveUser{
-//     constructor(socketId, mongoId, roomName, userName){
-//         this.socketId = socketId;
-//         this.mongoId = mongoId;
-//         this.roomName = roomName;
-//         this.userName = userName;
-//     }
-// }
-//
-// class ActiveUserList{
-//     constructor(){
-//         this.users = [];
-//     }
-//
-//     addUser(user){
-//         //starts from 0
-//         this.users.push(user);
-//         return user;
-//     }
-//     // users -> 0 '1' 2 3
-//     // turnId -> 0 '1' 2 3
-//
-//     // users -> 0 1 2
-//     // turnId -> 0 2 3
-//
-//     // users -> 0 1 2 3
-//     // turnId ->0 2 3
-//
-//     //------------------
-//
-//     // users -> 0 '1' 2 3
-//     // users -> 0 1 2
-//
-//
-//     removeUser(id){
-//         const user = this.getUser(id);
-//
-//         if(user){
-//             this.users = this.users.filter((user)=> user.socketId !== id);
-//         }
-//         return user;
-//     }
-//
-//     getUser(id){
-//         return this.users.filter((user)=> user.socketId === id)[0];
-//     }
-//
-//     getUserFromTurnId(turnId){
-//         return this.users.filter((user)=> user.turnId === turnId)[0];
-//     }
-//
-//     // getUserList(roomName){
-//     //     const users = this.users.filter((user)=> user.roomName === roomName);
-//     //     //const namesArray = users.map((user)=> user.name);
-//     //     return users;
-//     // }
-//
-//     getActiveUserNames(){
-//         return this.users.map((user) => user.userName);
-//     }
-//
-// }
-
-
-//TODO store users directly here -> do not use ActiveUserList class
-//TODO and inherit its functions
 class Room{
 
     constructor(roomName, roomPassword){
@@ -101,10 +32,62 @@ class Room{
     }
 
     nextTurn(){
-        this.gameState._turn = this.gameState.currentTurn++ % this.userSockets.length;
-        this.gameState.activeTurnSocket = this.userSockets[this.gameState._turn];
-        this.gameState.canvasData = [];
-        this.gameState.activeWord = this.randomWords[this.gameState._turn].key;
+        //TODO get the random word with the currentTurn variable but
+        //TODO check if the game ended or not and ArrayIndexOutOfBoundsException
+
+       console.log(this.gameState.currentTurn);
+       console.log(this.gameState._turn);
+       console.log(this.gameState.activeTurnSocket);
+
+        if(this.gameState.currentTurn >= this.randomWords.length){
+            //game over
+            console.log('game over line 44 rooms');
+            this.gameState.canvasData = [];
+            return false;
+
+        }else{
+            console.log('#devam');
+            this.gameState._turn = this.gameState.currentTurn++ % this.userSockets.length;
+            this.gameState.activeTurnSocket = this.userSockets[this.gameState._turn];
+            this.gameState.activeWord = this.randomWords[this.gameState._turn].key;
+            this.gameState.canvasData = [];
+        }
+        return true;
+
+    }
+
+    sendGameStateToActiveSocket(){
+        this.gameState.activeTurnSocket.emit('gameState',
+            {
+                status: 'success',
+                game:{
+                    status: this.gameState.status,
+                    _turn: this.gameState._turn,
+                    currentTurn: this.gameState.currentTurn,
+                    activeTurnSocketId: this.gameState.activeTurnSocket.id,
+                    activeWord: this.gameState.activeWord,
+                    canvasData: this.gameState.canvasData,
+                    chatData: this.gameState.chatData,
+                    userList: this.getActiveUserNames()
+                }
+            });
+    }
+
+    sendGameStateToOtherSockets(roomName){
+        this.gameState.activeTurnSocket.to(roomName).emit('gameState',
+            {
+                status: 'success',
+                game:{
+                    status: this.gameState.status,
+                    _turn: this.gameState._turn,
+                    currentTurn: this.gameState.currentTurn,
+                    activeTurnSocketId: this.gameState.activeTurnSocket.id,
+                    activeWord: '',
+                    canvasData: this.gameState.canvasData,
+                    chatData: this.gameState.chatData,
+                    userList: this.getActiveUserNames()
+                }
+            });
     }
 
     pushCanvasData(xy){

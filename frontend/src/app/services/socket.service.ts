@@ -9,7 +9,8 @@ import {Subscription} from "rxjs/internal/Subscription";
 export interface ChatMessage {
   message:{
     text: string,
-    createdAt: any
+    createdAt: any,
+    userName : string
   }
 }
 

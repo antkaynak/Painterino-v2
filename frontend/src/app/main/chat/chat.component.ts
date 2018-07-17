@@ -12,7 +12,6 @@ export class ChatComponent implements OnInit, OnDestroy {
 
   @ViewChild('chatList', {read: ElementRef}) public chatList : ElementRef;
 
-  // socketMessage : Subject<any>;
   socketMessageSubscription: Subscription;
 
   chatData: Array<any> = [];
@@ -39,6 +38,7 @@ export class ChatComponent implements OnInit, OnDestroy {
   }
 
   scrollChat(){
+    //TODO fix the chat scroll issue on new messages
     const clientHeight = this.chatList.nativeElement.clientHeight;
     const scrollTop = this.chatList.nativeElement.scrollTop;
     const scrollHeight = this.chatList.nativeElement.scrollHeight;
@@ -62,7 +62,8 @@ export class ChatComponent implements OnInit, OnDestroy {
     const message : ChatMessage = {
       message:{
         text:input,
-        createdAt: moment().valueOf()
+        createdAt: moment().valueOf(),
+        userName: 'Me'
       }
     };
     // const success = this.socketMessage.next(message);
@@ -76,8 +77,9 @@ export class ChatComponent implements OnInit, OnDestroy {
   }
 
   pushToMessage(message: ChatMessage){
+    console.log(message);
     const date = moment(message.message.createdAt).format('h:mm a');
-    const pushMessage = `${date} : ${message.message.text}`;
+    const pushMessage = `${date} ${message.message.userName}: ${message.message.text}`;
     this.chatData.push(pushMessage);
     this.scrollChat();
   }

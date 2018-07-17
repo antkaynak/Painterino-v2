@@ -3,6 +3,8 @@
 //a data structure to store active users and their information about
 //which room they are in and their names
 
+//TODO move all the game logic to this class and create a parent class called Game
+
 class Room{
 
     constructor(roomName, roomPassword){
@@ -10,6 +12,9 @@ class Room{
         this.roomPassword = roomPassword;
         this.userSockets = [];
         this.randomWords= [];
+        this.randomWordCount = 3;
+
+        this.correctGuessSockets = [];
 
         this.gameState = {
             status: 0,
@@ -18,7 +23,8 @@ class Room{
             activeTurnSocket: null,
             activeWord: null,
             canvasData: [],
-            chatData: []
+            chatData: [],
+            correctGuessCount: 0
         };
     }
 
@@ -31,10 +37,19 @@ class Room{
         this.gameState.status = 1;
     }
 
-    nextTurn(){
-        //TODO get the random word with the currentTurn variable but
-        //TODO check if the game ended or not and ArrayIndexOutOfBoundsException
+    checkIfAlreadyGuessed(userSocket) {
+        return this.correctGuessSockets.some(e => e === userSocket);
+    }
 
+
+    addScore(userSocket){
+
+        this.correctGuessSockets.push(userSocket);
+        this.gameState.correctGuessCount++;
+        userSocket.score += Math.round(900 / this.gameState.correctGuessCount);
+    }
+
+    nextTurn(){
        console.log(this.gameState.currentTurn);
        console.log(this.gameState._turn);
        console.log(this.gameState.activeTurnSocket);
@@ -46,11 +61,11 @@ class Room{
             return false;
 
         }else{
-            console.log('#devam');
             this.gameState._turn = this.gameState.currentTurn++ % this.userSockets.length;
             this.gameState.activeTurnSocket = this.userSockets[this.gameState._turn];
             this.gameState.activeWord = this.randomWords[this.gameState._turn].key;
             this.gameState.canvasData = [];
+            this.gameState.correctGuessCount = 0;
         }
         return true;
 
@@ -68,7 +83,7 @@ class Room{
                     activeWord: this.gameState.activeWord,
                     canvasData: this.gameState.canvasData,
                     chatData: this.gameState.chatData,
-                    userList: this.getActiveUserNames()
+                    userList: this.getActiveUsers()
                 }
             });
     }
@@ -85,7 +100,7 @@ class Room{
                     activeWord: '',
                     canvasData: this.gameState.canvasData,
                     chatData: this.gameState.chatData,
-                    userList: this.getActiveUserNames()
+                    userList: this.getActiveUsers()
                 }
             });
     }
@@ -115,8 +130,13 @@ class Room{
         return this.userSockets.filter((user)=> user === userSocket)[0];
     }
 
-    getActiveUserNames(){
-        return this.userSockets.map((user) => user.userName);
+    getActiveUsers(){
+        return this.userSockets.map((user) => {
+            return {
+                userName: user.userName,
+                score: user.score
+            }
+        });
     }
 
 }

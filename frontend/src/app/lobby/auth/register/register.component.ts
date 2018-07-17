@@ -39,7 +39,7 @@ export class RegisterComponent implements OnInit {
     console.log(password);
     this.authService.register(email, username,password,passwordConfirm).subscribe(res => {
       console.log(res);
-      this.router.navigate(['/']);
+      this.router.navigate(['/rooms']);
     });
   }
 

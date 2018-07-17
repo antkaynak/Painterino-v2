@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const moment = require('moment');
 
 const {Room, ActiveRoomList} = require('../model/rooms');
 const {User} = require('../model/users');
@@ -10,7 +11,7 @@ let sockets = {};
 
 sockets.init = function (server) {
     let activeRoomList = new ActiveRoomList();
-    const randomWordCount = 3;
+
 
     const io = require('socket.io').listen(server);
     io.on('connection', (socket) => {
@@ -54,13 +55,12 @@ sockets.init = function (server) {
                 socket['userName'] = user.username;
                 socket['roomName'] = params.room.roomName;
                 socket['token'] = params.token;
-                socket['points'] = 0;
+                socket['score'] = 0;
 
                 socket.join(params.room.roomName);
 
                 room.addUser(socket);
 
-                // socket.broadcast.to(params.room.roomName).emit('updateUserList', dsRoom.getActiveUserNames());
 
                 //game logic to check if the game should start or not
 
@@ -73,8 +73,8 @@ sockets.init = function (server) {
                         console.log("Game Start");
                         console.log("************************************");
 
-                        Word.findRandom({}, {}, {limit: randomWordCount},function (err, result) {
-                            if (err || !result || result.length < randomWordCount) {
+                        Word.findRandom({}, {}, {limit: room.randomWordCount},function (err, result) {
+                            if (err || !result || result.length < room.randomWordCount) {
                                 //TODO add a fail safe event so that the game cancels on an error.
                                 return;
                             }
@@ -99,11 +99,10 @@ sockets.init = function (server) {
                                     _turn: room.gameState._turn,
                                     currentTurn: room.gameState.currentTurn,
                                     activeTurnSocketId: null,
-                                    //TODO only current drawer should receive activeWord
                                     activeWord: null,
                                     canvasData: [],
                                     chatData: [],
-                                    userList: room.getActiveUserNames()
+                                    userList: room.getActiveUsers()
                                 }
                             });
                     }
@@ -161,7 +160,7 @@ sockets.init = function (server) {
                 socket['userName'] = user.username;
                 socket['roomName'] = params.room.roomName;
                 socket['token'] = params.token;
-                socket['points'] = 0;
+                socket['score'] = 0;
 
                 socket.emit('gameState', {
                     status: 'success',
@@ -173,7 +172,7 @@ sockets.init = function (server) {
                         activeWord: null,
                         canvasData: [],
                         chatData: [],
-                        userList: room.getActiveUserNames()
+                        userList: room.getActiveUsers()
                     }
                 });
 
@@ -210,7 +209,6 @@ sockets.init = function (server) {
                                 _turn: room.gameState._turn,
                                 currentTurn: room.gameState.currentTurn,
                                 activeTurnSocketId: null,
-                                //TODO only current drawer should receive activeWord
                                 activeWord: 'GAME OVER',
                                 canvasData: [],
                                 chatData: [],
@@ -243,6 +241,7 @@ sockets.init = function (server) {
             socket.broadcast.to(socket['roomName']).emit('receiveXY', xy);
         });
 
+        //TODO fix this if logic mess...
         socket.on('createMessage', (message, callback) => {
             if (socket['token'] === undefined) {
                 return;
@@ -254,44 +253,66 @@ sockets.init = function (server) {
 
             if(room.gameState.activeWord.trim().toLowerCase() === JSON.parse(message).message.text.trim().toLowerCase()
              && room.gameState.activeTurnSocket !== socket){
-                console.log('*****************************************');
-                console.log(activeRoomList.getRoom(socket['roomName']).getUser(socket).userName + ' has WON!');
-                console.log('*****************************************');
+                //TODO rebuild the cat name and time build logic
+                //TODO organize the code below
 
-                //TODO increase score for the winning socket
-                if(room.nextTurn()){
-                    room.sendGameStateToActiveSocket();
-                    room.sendGameStateToOtherSockets(socket['roomName']);
-
+                if(!room.checkIfAlreadyGuessed(socket)){
+                    room.addScore(socket);
+                }else{
+                    message = JSON.parse(message);
+                    message.message.userName = socket['userName'];
                     room.pushChatData(message);
                     socket.broadcast.to(socket['roomName']).emit('receiveMessage', {
-                        message
+                        message: JSON.stringify(message)
                     });
 
-                }else{
-                    //send game over event
-                    io.to(socket['roomName']).emit('gameState',
-                        {
-                            status: 'success',
-                            game:{
-                                status: room.gameState.status,
-                                _turn: room.gameState._turn,
-                                currentTurn: room.gameState.currentTurn,
-                                activeTurnSocketId: null,
-                                activeWord: 'GAME OVER',
-                                canvasData: [],
-                                chatData: [],
-                                userList: []
-                            }
-                        });
+                    return;
                 }
 
+                //There is a -1 because a player is drawing and cannot guess
+                if(room.gameState.correctGuessCount === room.userSockets.length - 1){
+                    if(room.nextTurn()){
+                        room.sendGameStateToActiveSocket();
+                        room.sendGameStateToOtherSockets(socket['roomName']);
+
+                    }else{
+                        //send game over event
+                        return io.to(socket['roomName']).emit('gameState',
+                            {
+                                status: 'success',
+                                game:{
+                                    status: room.gameState.status,
+                                    _turn: room.gameState._turn,
+                                    currentTurn: room.gameState.currentTurn,
+                                    activeTurnSocketId: null,
+                                    activeWord: 'GAME OVER',
+                                    canvasData: [],
+                                    chatData: [],
+                                    userList: []
+                                }
+                            });
+                    }
+                }else{
+                        room.sendGameStateToActiveSocket();
+                        room.sendGameStateToOtherSockets(socket['roomName']);
+                }
+
+                room.pushChatData(message);
+                io.to(socket['roomName']).emit('receiveMessage', {
+                    message: {
+                        text: `${socket['userName']} guessed correctly!`,
+                        createdAt: moment().valueOf(),
+                        userName: ''
+                    }
+                });
 
 
             }else{
+                message = JSON.parse(message);
+                message.message.userName = socket['userName'];
                 room.pushChatData(message);
                 socket.broadcast.to(socket['roomName']).emit('receiveMessage', {
-                    message
+                    message: JSON.stringify(message)
                 });
             }
             callback();
@@ -306,8 +327,3 @@ sockets.init = function (server) {
 
 sockets.lobbyRouter = router;
 module.exports = sockets;
-
-//TODO make activeword only visible to drawer +
-//TODO make somebody guessed event and game end event +
-//TODO fix turn logic +
-//TODO make scoreboard

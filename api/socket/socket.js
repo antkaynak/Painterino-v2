@@ -199,21 +199,17 @@ sockets.init = function (server) {
             }
             const user = room.removeUser(socket);
             if (user) {
-                //TODO send game over
+
                 if (room.userSockets.length <= 1) {
+                    //TODO send a separate object
+                    let scoreBoard = [{position: 0, score:0, userName: 'Everyone left the game!'}];
+
+                    //send game over event
                     io.to(socket['roomName']).emit('gameState',
                         {
-                            status: 'success',
-                            game:{
-                                status: room.gameState.status,
-                                _turn: room.gameState._turn,
-                                currentTurn: room.gameState.currentTurn,
-                                activeTurnSocketId: null,
-                                activeWord: 'GAME OVER',
-                                canvasData: [],
-                                chatData: [],
-                                userList: []
-                            }
+                            status: 'over',
+                            game: null,
+                            scoreBoard: scoreBoard
                         });
                     activeRoomList.removeRoom(socket['roomName']);
                 } else {
@@ -285,33 +281,32 @@ sockets.init = function (server) {
 
                     }else{
                         console.log("NEXT TURN NO NO GAME OVER");
-                        //send game over event
-                        return io.to(socket['roomName']).emit('gameState',
-                            {
-                                status: 'success',
-                                game:{
-                                    status: room.gameState.status,
-                                    _turn: room.gameState._turn,
-                                    currentTurn: room.gameState.currentTurn,
-                                    activeTurnSocketId: null,
-                                    activeWord: 'GAME OVER',
-                                    canvasData: [],
-                                    chatData: [],
-                                    userList: []
-                                }
+
+                        let scoreBoard = [];
+                        for(let i = 0 ; i < room.userSockets.length; i++){
+                            scoreBoard.push({
+                                userName: room.userSockets[i].userName,
+                                score: room.userSockets[i].score,
+                                position: i
                             });
+                        }
+
+                        //send game over event
+                        io.to(socket['roomName']).emit('gameState',
+                            {
+                                status: 'over',
+                                game: null,
+                                scoreBoard: scoreBoard
+                            });
+
+                        return activeRoomList.removeRoom(socket['roomName']);
                     }
                 }else{
                     console.log('THERE ARE PLAYERS WHO DID NOT GUESS!');
-                    console.log('BUT THESE PLAYERS HAVE GUESSED!');
-                    for(let i = 0; i < room.correctGuessSockets.length; i++){
-                        console.log(room.correctGuessSockets[i].id);
-                    }
+
                         room.sendGameStateToActiveSocket();
                         room.sendGameStateToOtherSockets(socket['roomName']);
                 }
-
-                console.log('I am here!');
 
                 room.pushChatData(message);
                 io.to(socket['roomName']).emit('receiveMessage', {
@@ -345,3 +340,4 @@ sockets.init = function (server) {
 
 sockets.lobbyRouter = router;
 module.exports = sockets;
+

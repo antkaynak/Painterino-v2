@@ -13,6 +13,7 @@ import {ReactiveFormsModule} from "@angular/forms";
 import { CreateComponent } from './room-list/create/create.component';
 import { JoinComponent } from './room-list/join/join.component';
 import { WaitComponent } from './wait/wait.component';
+import { ScoreBoardComponent } from './score-board/score-board.component';
 
 
 @NgModule({
@@ -30,7 +31,8 @@ import { WaitComponent } from './wait/wait.component';
     RegisterComponent,
     CreateComponent,
     JoinComponent,
-    WaitComponent
+    WaitComponent,
+    ScoreBoardComponent
   ],entryComponents: [
     CreateComponent,
     JoinComponent

@@ -22,6 +22,7 @@ export class SocketService {
   subjectXY: Subject<any>;
 
   gameState;
+  endGameScoreBoard;
   // gameStateSubscription: Subscription;
 
   private url = 'http://localhost:3000';
@@ -68,6 +69,7 @@ export class SocketService {
       console.log('No room selected.');
       return;
     }
+    this.gameState = null;
     this.socket = io(this.url);
 
 
@@ -106,7 +108,7 @@ export class SocketService {
             this.router.navigate(['/game']);
           }else{
 
-            this.router.navigate(['/lobby']);
+            this.router.navigate(['/wait']);
           }
 
         }else if(gameState.status === 'fail'){

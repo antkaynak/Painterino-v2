@@ -31,11 +31,17 @@ export class CanvasComponent implements OnInit, OnDestroy, AfterViewInit {
   public selectedSize: number = 3;
 
   constructor(private socketService: SocketService, private router: Router, private cpService: ColorPickerService) {
+  }
+
+  ngOnInit() {
     this.canvasData = this.socketService.gameState.game.canvasData;
     this.activeWord = this.socketService.gameState.game.activeWord;
     this.activeTurnSocketId = this.socketService.gameState.game.activeTurnSocketId;
 
     this.gameStateSubscription = this.socketService.createGameStateObservable().subscribe((gameState:any) => {
+      if(gameState.status === 'over'){
+        return;
+      }
       console.log("canvas component line 42");
       console.log(gameState);
       this.activeWord = gameState.game.activeWord;
@@ -54,11 +60,6 @@ export class CanvasComponent implements OnInit, OnDestroy, AfterViewInit {
         this.drawOnCanvas(xy.prevPos, xy.currentPos, xy.color, xy.size);
       });
     }
-
-  }
-
-  ngOnInit() {
-
   }
 
   public onChangeColorHex8(color: string) {

@@ -15,7 +15,6 @@ export class AuthGuardService implements CanActivate{
     if(this.authService.checkJWT()){
       return this.authService.getUser()
         .pipe(map(res=>{
-          console.log('?');
           // this.router.navigate(['/rooms']);
           return true;
         }),catchError( error=>{

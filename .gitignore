@@ -6,6 +6,8 @@ frontend/dist-server
 frontend/tmp
 frontend/out-tsc
 frontend/package-lock.json
+frontend/firebase.json
+frontend/.firebaserc
 
 # Socket
 socket/node_modules

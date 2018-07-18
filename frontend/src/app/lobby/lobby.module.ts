@@ -14,6 +14,7 @@ import { CreateComponent } from './room-list/create/create.component';
 import { JoinComponent } from './room-list/join/join.component';
 import { WaitComponent } from './wait/wait.component';
 import { ScoreBoardComponent } from './score-board/score-board.component';
+import {AuthComponent} from "./auth/auth.component";
 
 
 @NgModule({
@@ -26,6 +27,7 @@ import { ScoreBoardComponent } from './score-board/score-board.component';
   ],
   declarations: [
     LobbyComponent,
+    AuthComponent,
     RoomListComponent,
     LoginComponent,
     RegisterComponent,

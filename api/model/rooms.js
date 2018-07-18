@@ -38,21 +38,28 @@ class Room{
     }
 
     checkIfAlreadyGuessed(userSocket) {
-        return this.correctGuessSockets.some(e => e === userSocket);
+        if(this.correctGuessSockets.length === 0){
+            return false;
+        }
+        console.log("CHECKIFALREADYGUESSED METHOD!*********************************");
+        return this.correctGuessSockets.some(e => e.id === userSocket.id);
     }
 
 
     addScore(userSocket){
-
+        console.log("ADDSCORE METHOD!**********************************************");
         this.correctGuessSockets.push(userSocket);
         this.gameState.correctGuessCount++;
         userSocket.score += Math.round(900 / this.gameState.correctGuessCount);
     }
 
     nextTurn(){
-       console.log(this.gameState.currentTurn);
-       console.log(this.gameState._turn);
-       console.log(this.gameState.activeTurnSocket);
+        console.log("NEXTTURN METHOD!**********************************************");
+       console.log('this.gameState.currentTurn ',this.gameState.currentTurn);
+       console.log('this.gameState._turn ',this.gameState._turn);
+       console.log('this.gameState.activeTurnSocket.id ',this.gameState.activeTurnSocket.id);
+       console.log('this.randomWords.length', this.randomWords.length);
+       console.log('this.randomWordCount', this.randomWordCount);
 
         if(this.gameState.currentTurn >= this.randomWords.length){
             //game over
@@ -62,10 +69,17 @@ class Room{
 
         }else{
             this.gameState._turn = this.gameState.currentTurn++ % this.userSockets.length;
+            console.log("this.gameState._turn after calculation!", this.gameState._turn);
             this.gameState.activeTurnSocket = this.userSockets[this.gameState._turn];
-            this.gameState.activeWord = this.randomWords[this.gameState._turn].key;
+            console.log("this.gameState.activeTurnSocket.id after calculation!", this.gameState.activeTurnSocket.id);
+            this.gameState.activeWord = this.randomWords[this.gameState.currentTurn-1].key;
+            console.log("this.gameState.activeWord after calculation!", this.gameState.activeWord);
             this.gameState.canvasData = [];
             this.gameState.correctGuessCount = 0;
+            console.log("correctGuessSockets before but cleaning!");
+            console.log(this.correctGuessSockets.length);
+            this.correctGuessSockets = [];
+            console.log(this.correctGuessSockets.length);
         }
         return true;
 

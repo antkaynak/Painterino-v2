@@ -52,7 +52,7 @@ sockets.init = function (server) {
                     return callback('Room does not exist!');
                 }
 
-                socket['userName'] = user.username;
+                socket['userName'] = user.username+ ''+ room.userSockets.length;
                 socket['roomName'] = params.room.roomName;
                 socket['token'] = params.token;
                 socket['score'] = 0;
@@ -157,7 +157,7 @@ sockets.init = function (server) {
 
                 socket.join(params.room.roomName);
 
-                socket['userName'] = user.username;
+                socket['userName'] = user.username + '0';
                 socket['roomName'] = params.room.roomName;
                 socket['token'] = params.token;
                 socket['score'] = 0;
@@ -253,12 +253,16 @@ sockets.init = function (server) {
 
             if(room.gameState.activeWord.trim().toLowerCase() === JSON.parse(message).message.text.trim().toLowerCase()
              && room.gameState.activeTurnSocket !== socket){
+                console.log('Correct guess!');
+                console.log('socket', socket['userName']);
                 //TODO rebuild the cat name and time build logic
                 //TODO organize the code below
 
                 if(!room.checkIfAlreadyGuessed(socket)){
+                    console.log('Not already guessed!');
                     room.addScore(socket);
                 }else{
+                    console.log('Already guessed!');
                     message = JSON.parse(message);
                     message.message.userName = socket['userName'];
                     room.pushChatData(message);
@@ -269,13 +273,18 @@ sockets.init = function (server) {
                     return;
                 }
 
+                console.log('IN SOCKET.JS *******************');
+                console.log('correctGuessCount ', room.gameState.correctGuessCount);
+                console.log('userSockets.length ', room.userSockets.length);
                 //There is a -1 because a player is drawing and cannot guess
                 if(room.gameState.correctGuessCount === room.userSockets.length - 1){
                     if(room.nextTurn()){
+                        console.log("NEXT TURN AVAILABLE");
                         room.sendGameStateToActiveSocket();
                         room.sendGameStateToOtherSockets(socket['roomName']);
 
                     }else{
+                        console.log("NEXT TURN NO NO GAME OVER");
                         //send game over event
                         return io.to(socket['roomName']).emit('gameState',
                             {
@@ -293,9 +302,16 @@ sockets.init = function (server) {
                             });
                     }
                 }else{
+                    console.log('THERE ARE PLAYERS WHO DID NOT GUESS!');
+                    console.log('BUT THESE PLAYERS HAVE GUESSED!');
+                    for(let i = 0; i < room.correctGuessSockets.length; i++){
+                        console.log(room.correctGuessSockets[i].id);
+                    }
                         room.sendGameStateToActiveSocket();
                         room.sendGameStateToOtherSockets(socket['roomName']);
                 }
+
+                console.log('I am here!');
 
                 room.pushChatData(message);
                 io.to(socket['roomName']).emit('receiveMessage', {
@@ -308,6 +324,7 @@ sockets.init = function (server) {
 
 
             }else{
+                console.log('just a normal message');
                 message = JSON.parse(message);
                 message.message.userName = socket['userName'];
                 room.pushChatData(message);
@@ -315,6 +332,7 @@ sockets.init = function (server) {
                     message: JSON.stringify(message)
                 });
             }
+            console.log('callback();');
             callback();
         });
     });

@@ -9,6 +9,8 @@ import { UserListComponent } from './user-list/user-list.component';
 import { ChatComponent } from './chat/chat.component';
 import {MaterialModule} from "../material.module";
 import {ColorPickerModule} from "ngx-color-picker";
+import { StopwatchComponent } from './toolbar/stopwatch/stopwatch.component';
+import { ToolbarComponent } from './toolbar/toolbar.component';
 
 
 @NgModule({
@@ -23,7 +25,9 @@ import {ColorPickerModule} from "ngx-color-picker";
     MainComponent,
     CanvasComponent,
     UserListComponent,
-    ChatComponent
+    ChatComponent,
+    StopwatchComponent,
+    ToolbarComponent
   ]
 })
 export class MainModule {

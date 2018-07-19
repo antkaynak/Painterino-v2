@@ -3,11 +3,8 @@ import {AfterViewInit, Component, ElementRef, HostListener, Input, OnDestroy, On
 import {pairwise, switchMap, takeUntil} from 'rxjs/operators';
 import {fromEvent} from "rxjs/internal/observable/fromEvent";
 import {SocketService} from "../../services/socket.service";
-import {Subject} from "rxjs";
-import { map } from 'rxjs/operators';
 import {Subscription} from "rxjs/internal/Subscription";
-import {ColorPickerService} from "ngx-color-picker";
-import {Router} from "@angular/router";
+
 
 
 @Component({
@@ -17,41 +14,31 @@ import {Router} from "@angular/router";
 })
 export class CanvasComponent implements OnInit, OnDestroy, AfterViewInit {
 
-  // socketXY : Subject<any>;
   socketXYSubscription: Subscription = null;
   gameStateSubscription: Subscription = null;
+
   canvasData = [];
   activeTurnSocketId;
 
-  activeWord = "error";
 
-
-
-  public selectedColor: string = '#000000';
-  public selectedSize: number = 3;
-
-  constructor(private socketService: SocketService, private router: Router, private cpService: ColorPickerService) {
+  constructor(private socketService: SocketService) {
   }
 
   ngOnInit() {
     this.canvasData = this.socketService.gameState.game.canvasData;
-    this.activeWord = this.socketService.gameState.game.activeWord;
+
     this.activeTurnSocketId = this.socketService.gameState.game.activeTurnSocketId;
 
     this.gameStateSubscription = this.socketService.createGameStateObservable().subscribe((gameState:any) => {
       if(gameState.status === 'over'){
         return;
       }
-      console.log("canvas component line 42");
-      console.log(gameState);
-      this.activeWord = gameState.game.activeWord;
       this.activeTurnSocketId = gameState.game.activeTurnSocketId;
 
       if(gameState.game.canvasData.length < 1){
         this.canvasData = [];
         this.clearCanvas();
       }
-
     });
 
     if(this.socketService.subjectXY !== undefined || this.socketService.subjectXY !== null){
@@ -62,16 +49,6 @@ export class CanvasComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
-  public onChangeColorHex8(color: string) {
-    const hsva = this.cpService.stringToHsva(color, true);
-    if (hsva) {
-      this.selectedColor = this.cpService.outputFormat(hsva, 'hex', null);
-    }
-  }
-
-  public onChangeSize(event: any){
-    this.selectedSize = event.value;
-  }
 
   ngOnDestroy() {
     if(this.socketXYSubscription != null){
@@ -106,9 +83,9 @@ export class CanvasComponent implements OnInit, OnDestroy, AfterViewInit {
 
 
     // set some default properties about the line
-    this.cx.lineWidth = this.selectedSize;
+    this.cx.lineWidth = this.socketService.toolBar.size;
     this.cx.lineCap = 'round';
-    this.cx.strokeStyle = this.selectedColor;
+    this.cx.strokeStyle = this.socketService.toolBar.color;
 
     this.captureEvents(canvasEl);
 
@@ -156,10 +133,10 @@ export class CanvasComponent implements OnInit, OnDestroy, AfterViewInit {
         this.socketService.subjectXY.next({
           prevPos,
           currentPos,
-          color: this.selectedColor,
-          size: this.selectedSize
+          color: this.socketService.toolBar.color,
+          size: this.socketService.toolBar.size
         });
-        this.drawOnCanvas(prevPos, currentPos, this.selectedColor, this.selectedSize);
+        this.drawOnCanvas(prevPos, currentPos, this.socketService.toolBar.color, this.socketService.toolBar.size);
       });
   }
 

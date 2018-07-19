@@ -19,21 +19,15 @@ export class WaitComponent implements OnInit, OnDestroy {
   constructor(private socketService : SocketService, private router: Router) { }
 
   ngOnInit() {
-
-    console.log('INITGAMESTATE');
-    console.log(this.socketService.gameState);
     this.activeUserList = this.socketService.gameState.game.userList;
 
     if(this.socketService.gameState.game.status === 0){
       this.gameStateSubscription = this.socketService.createGameStateObservable().subscribe( (gameState:any) =>{
-        console.log("wait component line 28");
-        console.log(gameState);
         this.socketService.gameState = gameState;
-        console.log('flag, game starting');
-        console.log(this.socketService.gameState);
-        console.log(gameState);
         if(gameState.game.status === 1){
           this.router.navigate(['/game']);
+        }else{
+          this.activeUserList = gameState.game.userList;
         }
       });
     }else if(this.socketService.gameState.game.status === 1){
@@ -43,10 +37,6 @@ export class WaitComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    // if(this.socketService.socket !== undefined){
-    //   this.socketService.socket.disconnect();
-    // }
-
     if(this.gameStateSubscription != null){
       this.gameStateSubscription.unsubscribe();
     }

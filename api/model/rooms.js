@@ -1,40 +1,125 @@
 
 
+
 //a data structure to store active users and their information about
 //which room they are in and their names
 
-//TODO move all the game logic to this class and create a parent class called Game
-
 class Room{
-
-    constructor(roomName, roomPassword){
+    constructor(io, roomName, roomPassword){
+        this.io = io;
         this.roomName = roomName;
         this.roomPassword = roomPassword;
         this.userSockets = [];
         this.randomWords= [];
-        this.randomWordCount = 3;
-
         this.correctGuessSockets = [];
+        this.timerMaxLimit = 60;
+        this.activeTimerCount = -1;
+        this.randomWordCount= 4;
+        this.timerInterval = null;
 
         this.gameState = {
             status: 0,
             _turn: 0,
             currentTurn: 0,
             activeTurnSocket: null,
-            activeWord: null,
+            activeWord: '',
             canvasData: [],
             chatData: [],
             correctGuessCount: 0
         };
     }
 
-    startGame(randomWordArray){
-        this.randomWords = randomWordArray;
-        this.gameState.activeWord = randomWordArray[0].key;
-        console.log("startGame method rooms.js");
-        this.gameState._turn = this.gameState.currentTurn++ % this.userSockets.length;
-        this.gameState.activeTurnSocket = this.userSockets[this.gameState._turn];
-        this.gameState.status = 1;
+    gameStart(){
+        if (this.userSockets.length > 1) {
+            console.log("************************************");
+            console.log("Game Start");
+            console.log("************************************");
+            this.gameState.activeWord = this.randomWords[0].key;
+                console.log("startGame method rooms.js");
+            this.gameState._turn = this.gameState.currentTurn++ % this.userSockets.length;
+            this.gameState.activeTurnSocket = this.userSockets[this.gameState._turn];
+            this.gameState.status = 1;
+            this.activeTimerCount = this.timerMaxLimit;
+            this.timerInterval = setInterval(this.timerTick.bind(this),1000);
+            return true;
+        } else {
+           return false;
+        }
+    }
+
+    timerTick(){
+        console.log('tick ', this.activeTimerCount);
+        this.activeTimerCount--;
+        if (this.activeTimerCount === 0) {
+            return this.timerOver();
+        }
+
+        this.gameState.activeTurnSocket.to(this.roomName).emit('timer', {
+            tick: this.activeTimerCount
+        });
+
+        this.gameState.activeTurnSocket.emit('timer', {
+            tick: this.activeTimerCount
+        });
+    }
+
+    timerOver(){
+        if(this.nextTurn()){
+            console.log('TIME OVER');
+            this.sendGameStateToActiveSocket();
+            this.sendGameStateToOtherSockets(this.roomName);
+        }else{
+            this.gameOver(this.io, this.roomName);
+            if(this.timerInterval !== null){
+                clearInterval(this.timerInterval);
+            }
+        }
+    }
+
+    gameOver(io, roomName){
+
+        let scoreBoard = [];
+        for (let i = 0; i < this.userSockets.length; i++) {
+            scoreBoard.push({
+                userName: this.userSockets[i].userName,
+                score: this.userSockets[i].score,
+                position: i
+            });
+        }
+
+        //send game over event
+        io.to(roomName).emit('gameState',
+            {
+                status: 'over',
+                game: null,
+                scoreBoard: scoreBoard
+            });
+
+        // io.sockets.clients(roomName).forEach(function(s){
+        //     s.leave(roomName);
+        // });
+
+        if(this.timerInterval !== null){
+            clearInterval(this.timerInterval);
+        }
+
+        activeRoomList.removeRoom(this.roomName);
+    }
+
+    gameFailedOver(io, roomName){
+        let scoreBoard = [{position: 0, score: 0, userName: 'Everyone left the game!'}];
+
+        //send game over event
+        io.to(roomName).emit('gameState',
+            {
+                status: 'over',
+                game: null,
+                scoreBoard: scoreBoard
+            });
+        if(this.timerInterval !== null){
+            clearInterval(this.timerInterval);
+        }
+        activeRoomList.removeRoom(this.roomName);
     }
 
     checkIfAlreadyGuessed(userSocket) {
@@ -53,6 +138,10 @@ class Room{
         userSocket.score += Math.round(900 / this.gameState.correctGuessCount);
     }
 
+    addScoreToDrawer(userSocket){
+        userSocket.score += Math.round(100 * this.gameState.correctGuessCount);
+    }
+
     nextTurn(){
         console.log("NEXTTURN METHOD!**********************************************");
        console.log('this.gameState.currentTurn ',this.gameState.currentTurn);
@@ -64,10 +153,13 @@ class Room{
         if(this.gameState.currentTurn >= this.randomWords.length){
             //game over
             console.log('game over line 44 rooms');
+            this.addScoreToDrawer(this.gameState.activeTurnSocket);
             this.gameState.canvasData = [];
+            clearInterval(this.timerInterval);
             return false;
 
         }else{
+            this.addScoreToDrawer(this.gameState.activeTurnSocket);
             this.gameState._turn = this.gameState.currentTurn++ % this.userSockets.length;
             console.log("this.gameState._turn after calculation!", this.gameState._turn);
             this.gameState.activeTurnSocket = this.userSockets[this.gameState._turn];
@@ -80,6 +172,8 @@ class Room{
             console.log(this.correctGuessSockets.length);
             this.correctGuessSockets = [];
             console.log(this.correctGuessSockets.length);
+            this.activeTimerCount = this.timerMaxLimit;
+
         }
         return true;
 
@@ -102,8 +196,8 @@ class Room{
             });
     }
 
-    sendGameStateToOtherSockets(roomName){
-        this.gameState.activeTurnSocket.to(roomName).emit('gameState',
+    sendGameStateToOtherSockets(){
+        this.gameState.activeTurnSocket.to(this.roomName).emit('gameState',
             {
                 status: 'success',
                 game:{
@@ -118,6 +212,41 @@ class Room{
                 }
             });
     }
+
+    sendGameStateToSocket(socket){
+        socket.emit('gameState',
+            {
+                status: 'success',
+                game:{
+                    status: this.gameState.status,
+                    _turn: this.gameState._turn,
+                    currentTurn: this.gameState.currentTurn,
+                    activeTurnSocketId: this.gameState.activeTurnSocket === null ? null : this.gameState.activeTurnSocket.id,
+                    activeWord: this.gameState.activeWord,
+                    canvasData: this.gameState.canvasData,
+                    chatData: this.gameState.chatData,
+                    userList: this.getActiveUsers()
+                }
+            });
+    }
+
+    sendGameStateToAllSockets(){
+        this.io.to(this.roomName).emit('gameState',
+            {
+                status: 'success',
+                game:{
+                    status: this.gameState.status,
+                    _turn: this.gameState._turn,
+                    currentTurn: this.gameState.currentTurn,
+                    activeTurnSocketId: this.gameState.activeTurnSocket === null ? null : this.gameState.activeTurnSocket.id,
+                    activeWord: this.gameState.activeWord,
+                    canvasData: this.gameState.canvasData,
+                    chatData: this.gameState.chatData,
+                    userList: this.getActiveUsers()
+                }
+            });
+    }
+
 
     pushCanvasData(xy){
         this.gameState.canvasData.push(xy);
@@ -186,6 +315,8 @@ class ActiveRoomList{
 }
 
 
+let activeRoomList = new ActiveRoomList();
+
 
 module.exports.Room= Room;
-module.exports.ActiveRoomList = ActiveRoomList;
+module.exports.activeRoomList = activeRoomList;

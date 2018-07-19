@@ -19,6 +19,8 @@ export class UserListComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.userList = this.socketService.gameState.game.userList;
     this.currentTurn = this.socketService.gameState.game.currentTurn;
+
+    //TODO fix this...
     this.userListSubscription = this.socketService.createGameStateObservable().subscribe((gameState:any)=>{
       if(gameState.status === 'over'){
           console.log('USER-LIST COMPONENT ' ,gameState);
@@ -29,6 +31,7 @@ export class UserListComponent implements OnInit, OnDestroy {
       this.userList = gameState.game.userList;
       this.currentTurn = gameState.game.currentTurn;
     });
+
   }
 
   ngOnDestroy() {

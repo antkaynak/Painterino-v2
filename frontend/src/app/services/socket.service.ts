@@ -17,18 +17,17 @@ export interface ChatMessage {
 @Injectable()
 export class SocketService {
 
-  //TODO function names and their order
-
   subjectXY: Subject<any>;
-
   gameState;
+  toolBar = {
+    color: '#000000',
+    size: 3
+  };
   endGameScoreBoard;
-  // gameStateSubscription: Subscription;
-
-  private url = 'http://localhost:3000';
   // Our socket connection
   socket;
 
+  private url = 'http://localhost:3000';
   private room: { roomName: null, roomPassword: null };
 
   constructor(private http: HttpClient, private router: Router) { }
@@ -43,10 +42,23 @@ export class SocketService {
       .pipe(flatMap(() => this.http.get(this.url+'/lobby/rooms')));
   }
 
+  connectToTimer(){
+    return new Observable( observer => {
+      this.socket.on('timer', (data) => {
+        observer.next(data);
+      });
+      return () => {
+        console.log('timer disconnect');
+        this.socket.disconnect();
+      }
+    })
+  }
+
 
   connectToChat(){
     return new Observable(observer => {
       this.socket.on('receiveMessage', (data)=>{
+        console.log(data);
         observer.next(JSON.parse(data.message));
       });
       return () => {

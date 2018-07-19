@@ -1,27 +1,3 @@
-<div fxLayout="column" fxLayoutAlign="center" style="width: 100%; height: 100vh">
-  <div fxFlex="90%" #canvasDiv>
-    <canvas #canvas style="background-color: white"></canvas>
-  </div>
-  <div fxFlex="10%">
-    <div fxLayout="row" fxLayoutAlign="center" class="tool-box">
-      <div fxFlex="20%">
-        <label id="color-picker-wrapper"><input
-                              class="color-picker"
-                             [cpDisableInput]="true"
-                             [(colorPicker)]="selectedColor"
-                             (colorPickerChange)="onChangeColorHex8($event)"
-                             [cpPosition]="'top'" [style.background]="selectedColor"
-                              [readonly]="true"
-        /></label>
-      </div>
-      <div fxFlex="20%">
-        <mat-slider thumbLabel min="1" max="48" step="2" value="3" (input)="onChangeSize($event)"></mat-slider>
-      </div>
-
-      <div fxFlex="20%" style="font-size: 1.75em"
-           *ngIf="activeWord !== undefined">{{activeWord}}</div>
-    </div>
-  </div>
-
+<div #canvasDiv style="width: 100%; height: 100%">
+  <canvas #canvas style="background-color: white"></canvas>
 </div>
-

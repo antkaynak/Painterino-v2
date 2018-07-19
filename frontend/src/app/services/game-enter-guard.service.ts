@@ -1,24 +1,18 @@
 import { Injectable } from '@angular/core';
 import {ActivatedRouteSnapshot, CanActivate, Router, RouterStateSnapshot} from "@angular/router";
-import {Observable} from "rxjs";
 import {SocketService} from "./socket.service";
+import {Observable} from "rxjs/index";
 
 @Injectable()
-export class LobbyEnterGuardService implements CanActivate{
+export class GameEnterGuardService implements CanActivate{
 
   constructor(private router: Router, private socketService: SocketService) { }
 
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean> | Promise<boolean> | boolean {
-    console.log(this.socketService.gameState);
-    if(state.url === '/'){
-      //does not matter if we navigate to login or rooms because
-      //their guard will decide it anyway.
+    if(this.socketService.socket === undefined || this.socketService.socket === null){
       this.router.navigate(['/login']);
-    }else if((state.url === '/score' || state.url === '/wait' ) && this.socketService.gameState === undefined){
-      this.router.navigate(['/rooms']);
+      return false;
     }
-    console.log(state);
-    console.log(route);
     return true;
   }
 }

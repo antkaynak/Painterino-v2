@@ -17,6 +17,7 @@ import {AuthInterceptorService} from "./services/auth-interceptor.service";
 import {MAT_DIALOG_DEFAULT_OPTIONS} from "@angular/material";
 import {LobbyLeaveGuardService} from "./services/lobby-leave-guard.service";
 import {LobbyEnterGuardService} from "./services/lobby-enter-guard.service";
+import {GameEnterGuardService} from "./services/game-enter-guard.service";
 
 
 
@@ -40,7 +41,7 @@ import {LobbyEnterGuardService} from "./services/lobby-enter-guard.service";
       multi: true
     },
     {provide: MAT_DIALOG_DEFAULT_OPTIONS, useValue: {hasBackdrop: false}},
-    SocketService, AuthService, AuthGuardService, NonAuthGuardService, LobbyLeaveGuardService, LobbyEnterGuardService],
+    SocketService, AuthService, AuthGuardService, NonAuthGuardService, LobbyLeaveGuardService, LobbyEnterGuardService, GameEnterGuardService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

@@ -24,11 +24,10 @@ export class SocketService {
     size: 3
   };
   endGameScoreBoard;
-  // Our socket connection
   socket;
 
   private url = 'http://localhost:3000';
-  private room: { roomName: null, roomPassword: null };
+  private room: { roomName: null, roomPassword: null, min: 2, max: 2 };
 
   constructor(private http: HttpClient, private router: Router) { }
 
@@ -48,7 +47,6 @@ export class SocketService {
         observer.next(data);
       });
       return () => {
-        console.log('timer disconnect');
         this.socket.disconnect();
       }
     })
@@ -58,7 +56,6 @@ export class SocketService {
   connectToChat(){
     return new Observable(observer => {
       this.socket.on('receiveMessage', (data)=>{
-        console.log(data);
         observer.next(JSON.parse(data.message));
       });
       return () => {
@@ -70,7 +67,6 @@ export class SocketService {
   sendToChat(data){
     return this.socket.emit('createMessage', JSON.stringify(data), function (error){
       if(error){
-        console.log(error);
         alert('An error occurred sending message to the chat.');
       }
     });
@@ -120,26 +116,18 @@ export class SocketService {
             this.router.navigate(['/game']);
           }else{
 
-            this.router.navigate(['/wait']);
+            this.router.navigate(['/lobby/wait']);
           }
 
         }else if(gameState.status === 'fail'){
-          alert('An error occurred.');
+          alert(gameState.errorMessage);
         }
-      })).subscribe(data => console.log('leaking data!!!!   ', data));
+      })).subscribe();
 
     if(type === 'create'){
-      this.socket.emit('create', { room:this.room, token: localStorage.getItem("id_token")}, function(error){
-        if(error){
-          console.log(error);
-        }
-      });
+      this.socket.emit('create', { room:this.room, token: localStorage.getItem("id_token")});
     }else if(type === 'join'){
-      this.socket.emit('join', { room:this.room, token: localStorage.getItem("id_token")}, function(error){
-        if(error){
-          console.log(error);
-        }
-      });
+      this.socket.emit('join', { room:this.room, token: localStorage.getItem("id_token")});
     }else{
       alert('error');
     }
@@ -150,8 +138,6 @@ export class SocketService {
   createGameStateObservable(){
     return new Observable( observer => {
       this.socket.on('gameState', (gameState) => {
-        console.log('createGameStateObservable');
-        console.log(gameState);
         observer.next(gameState);
       })
     });

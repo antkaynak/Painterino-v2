@@ -2,6 +2,7 @@ import {Component, OnDestroy, OnInit} from '@angular/core';
 import {SocketService} from "../../services/socket.service";
 import {ColorPickerService} from "ngx-color-picker";
 import {Subscription} from "rxjs/internal/Subscription";
+import {Router} from "@angular/router";
 
 @Component({
   selector: 'app-toolbar',
@@ -10,20 +11,26 @@ import {Subscription} from "rxjs/internal/Subscription";
 })
 export class ToolbarComponent implements OnInit, OnDestroy {
 
+  timerSubscription: Subscription = null;
+  timerValue = 0;
 
   activeWord = "error";
   activeWordSubscription: Subscription = null;
   initColor: string = '#000000';
 
-  constructor(private socketService: SocketService,  private cpService: ColorPickerService) { }
+  constructor(private socketService: SocketService, private router: Router, private cpService: ColorPickerService) { }
 
   ngOnInit() {
     this.activeWord = this.socketService.gameState.game.activeWord;
     this.activeWordSubscription = this.socketService.createGameStateObservable().subscribe((gameState:any) => {
       if(gameState.status === 'over'){
-        return;
+        this.socketService.endGameScoreBoard = gameState.scoreBoard;
+        return this.router.navigate(['/lobby/score']);
       }
       this.activeWord = gameState.game.activeWord;
+    });
+    this.timerSubscription = this.socketService.connectToTimer().subscribe( (data: any)=> {
+      this.timerValue = data.tick;
     });
   }
 

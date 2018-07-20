@@ -3,7 +3,6 @@ import {FormControl, FormGroup, Validators} from "@angular/forms";
 import {MAT_DIALOG_DATA, MatDialogRef} from "@angular/material";
 import {CreateComponent} from "../create/create.component";
 import * as BlankValidator from "../../../services/validators/blank.validator";
-import {Router} from "@angular/router";
 import {SocketService} from "../../../services/socket.service";
 
 @Component({
@@ -15,7 +14,7 @@ export class JoinComponent implements OnInit {
 
   roomForm: FormGroup;
 
-  constructor(private socketService: SocketService, private router: Router,
+  constructor(private socketService: SocketService,
               public dialogRef: MatDialogRef<CreateComponent>,
               @Inject(MAT_DIALOG_DATA) public data: any) { }
 

@@ -15,6 +15,7 @@
 
   <div fxFlex="20%" style="font-size: 1.75em" *ngIf="activeWord !== undefined">{{activeWord}}</div>
   <div fxFlex="20%">
-    <app-stopwatch></app-stopwatch>
+    <p style="padding: 0; margin: 0; font-size: 1.25em">{{timerValue}}</p>
   </div>
 </div>
+<mat-progress-bar mode="determinate" [value]="100 - (timerValue * 1.65)" aria-label="progress"></mat-progress-bar>

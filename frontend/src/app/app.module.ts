@@ -6,7 +6,7 @@ import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {PreloadAllModules, RouterModule} from "@angular/router";
 import { PageNotFoundComponent } from './page-not-found/page-not-found.component';
 import {AppRoutes} from "./app.routes";
-import {MainModule} from "./main/main.module";
+import {GameModule} from "./game/game.module";
 import {SocketService} from "./services/socket.service";
 import {AuthService} from "./services/auth.service";
 import {AuthGuardService} from "./services/auth-guard.service";
@@ -18,6 +18,9 @@ import {MAT_DIALOG_DEFAULT_OPTIONS} from "@angular/material";
 import {LobbyLeaveGuardService} from "./services/lobby-leave-guard.service";
 import {LobbyEnterGuardService} from "./services/lobby-enter-guard.service";
 import {GameEnterGuardService} from "./services/game-enter-guard.service";
+import {GameLeaveGuardService} from "./services/game-leave-guard.service";
+import {HomeModule} from "./home/home.module";
+import {MaterialModule} from "./material.module";
 
 
 
@@ -29,8 +32,10 @@ import {GameEnterGuardService} from "./services/game-enter-guard.service";
   imports: [
     BrowserModule,
     BrowserAnimationsModule,
+    MaterialModule,
     HttpClientModule,
-    MainModule,
+    HomeModule,
+    // GameModule,
     LobbyModule,
     RouterModule.forRoot(AppRoutes, {useHash: false, preloadingStrategy: PreloadAllModules})
   ],
@@ -41,7 +46,9 @@ import {GameEnterGuardService} from "./services/game-enter-guard.service";
       multi: true
     },
     {provide: MAT_DIALOG_DEFAULT_OPTIONS, useValue: {hasBackdrop: false}},
-    SocketService, AuthService, AuthGuardService, NonAuthGuardService, LobbyLeaveGuardService, LobbyEnterGuardService, GameEnterGuardService],
+    SocketService, AuthService, AuthGuardService, NonAuthGuardService,
+    LobbyLeaveGuardService, LobbyEnterGuardService, GameEnterGuardService,
+    GameLeaveGuardService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

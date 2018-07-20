@@ -1,22 +1,25 @@
-
-
-
-//a data structure to store active users and their information about
-//which room they are in and their names
+const moment = require('moment');
 
 class Room{
-    constructor(io, roomName, roomPassword){
+
+    constructor(io, roomName, roomPassword, minPlayerCount, maxPlayerCount){
+        //setting room configs
         this.io = io;
         this.roomName = roomName;
         this.roomPassword = roomPassword;
         this.userSockets = [];
         this.randomWords= [];
         this.correctGuessSockets = [];
+        this.minPlayerCount = minPlayerCount;
+        this.maxPlayerCount = maxPlayerCount;
+
+        //Timer
         this.timerMaxLimit = 60;
         this.activeTimerCount = -1;
         this.randomWordCount= 4;
         this.timerInterval = null;
 
+        //gameState the server stores
         this.gameState = {
             status: 0,
             _turn: 0,
@@ -24,60 +27,68 @@ class Room{
             activeTurnSocket: null,
             activeWord: '',
             canvasData: [],
-            chatData: [],
-            correctGuessCount: 0
+            chatData: []
         };
     }
 
     gameStart(){
-        if (this.userSockets.length > 1) {
-            console.log("************************************");
-            console.log("Game Start");
-            console.log("************************************");
+        if (this.userSockets.length >= this.minPlayerCount) {
+            //the first random word in the room
+            //randomWords array got words while creating the room
             this.gameState.activeWord = this.randomWords[0].key;
-                console.log("startGame method rooms.js");
+
+            //The _turn variable stores the array indexes of the current turns.
             this.gameState._turn = this.gameState.currentTurn++ % this.userSockets.length;
+
             this.gameState.activeTurnSocket = this.userSockets[this.gameState._turn];
+
+            //status 1 means the game is active
             this.gameState.status = 1;
+
+            //max time in the room per draw turn
             this.activeTimerCount = this.timerMaxLimit;
+
+            //starting the timer
             this.timerInterval = setInterval(this.timerTick.bind(this),1000);
+
+            //returning true so that would mean start the game
             return true;
         } else {
+            //return false because there are not enough players
            return false;
         }
     }
 
     timerTick(){
-        console.log('tick ', this.activeTimerCount);
+        //decrease time on every interval
         this.activeTimerCount--;
         if (this.activeTimerCount === 0) {
             return this.timerOver();
         }
 
-        this.gameState.activeTurnSocket.to(this.roomName).emit('timer', {
-            tick: this.activeTimerCount
-        });
-
-        this.gameState.activeTurnSocket.emit('timer', {
+        //emit the time to clients
+        this.io.to(this.roomName).emit('timer', {
             tick: this.activeTimerCount
         });
     }
 
     timerOver(){
+        //if there are a next turn available
         if(this.nextTurn()){
-            console.log('TIME OVER');
             this.sendGameStateToActiveSocket();
             this.sendGameStateToOtherSockets(this.roomName);
         }else{
-            this.gameOver(this.io, this.roomName);
+            //it was the last round so end the game
+            this.gameOver();
             if(this.timerInterval !== null){
                 clearInterval(this.timerInterval);
             }
         }
     }
 
-    gameOver(io, roomName){
+    gameOver(){
 
+        //create a scoreboard
         let scoreBoard = [];
         for (let i = 0; i < this.userSockets.length; i++) {
             scoreBoard.push({
@@ -88,16 +99,12 @@ class Room{
         }
 
         //send game over event
-        io.to(roomName).emit('gameState',
+        this.io.to(this.roomName).emit('gameState',
             {
                 status: 'over',
                 game: null,
                 scoreBoard: scoreBoard
             });
-
-        // io.sockets.clients(roomName).forEach(function(s){
-        //     s.leave(roomName);
-        // });
 
         if(this.timerInterval !== null){
             clearInterval(this.timerInterval);
@@ -106,11 +113,11 @@ class Room{
         activeRoomList.removeRoom(this.roomName);
     }
 
-    gameFailedOver(io, roomName){
+    gameFailedOver(){
         let scoreBoard = [{position: 0, score: 0, userName: 'Everyone left the game!'}];
 
         //send game over event
-        io.to(roomName).emit('gameState',
+        this.io.to(this.roomName).emit('gameState',
             {
                 status: 'over',
                 game: null,
@@ -122,56 +129,98 @@ class Room{
         activeRoomList.removeRoom(this.roomName);
     }
 
+    checkIfGuessed(userSocket, message){
+        const text = JSON.parse(message).message.text.trim().toLowerCase();
+        if (this.gameState.activeWord.trim().toLowerCase() === text
+            && this.gameState.activeTurnSocket !== userSocket) {
+            if (!this.checkIfAlreadyGuessed(userSocket)) {
+                this.addScore(userSocket);
+            } else {
+                message = JSON.parse(message);
+                message.message.userName = userSocket['userName'];
+                this.pushChatData(message);
+                userSocket.broadcast.to(this.roomName).emit('receiveMessage', {
+                    message: JSON.stringify(message)
+                });
+                return;
+            }
+            //There is a -1 because a player is drawing and cannot guess
+            if (this.correctGuessSockets.length === this.userSockets.length - 1) {
+                if (this.nextTurn()) {
+                    this.sendGameStateToActiveSocket();
+                    this.sendGameStateToOtherSockets();
+
+                } else {
+                    this.gameOver();
+                    return;
+                }
+            } else {
+                this.sendGameStateToActiveSocket();
+                this.sendGameStateToOtherSockets();
+            }
+
+            this.pushChatData(message);
+            const sendMessage = {
+                message: {
+                    text: userSocket['userName'] + ' guessed correctly!',
+                    createdAt: moment().valueOf(),
+                    userName: ''
+                }
+            };
+            this.io.to(this.roomName).emit('receiveMessage', {
+                message: JSON.stringify(sendMessage)
+            });
+
+
+        } else {
+            message = JSON.parse(message);
+            message.message.userName = userSocket['userName'];
+            this.pushChatData(message);
+            userSocket.broadcast.to(this.roomName).emit('receiveMessage', {
+                message: JSON.stringify(message)
+            });
+        }
+    }
+
     checkIfAlreadyGuessed(userSocket) {
+        //quick check to see if the array is empty
         if(this.correctGuessSockets.length === 0){
             return false;
         }
-        console.log("CHECKIFALREADYGUESSED METHOD!*********************************");
+        //returns boolean considering if there is a socket with the id in the array
         return this.correctGuessSockets.some(e => e.id === userSocket.id);
     }
 
 
     addScore(userSocket){
-        console.log("ADDSCORE METHOD!**********************************************");
+        //adding score means player guessed
         this.correctGuessSockets.push(userSocket);
-        this.gameState.correctGuessCount++;
-        userSocket.score += Math.round(900 / this.gameState.correctGuessCount);
+        userSocket.score += Math.round(900 / this.correctGuessSockets.length);
     }
 
     addScoreToDrawer(userSocket){
-        userSocket.score += Math.round(100 * this.gameState.correctGuessCount);
+        //adds points to the current active drawing player based on how many players guessed
+        userSocket.score += Math.round(100 * this.correctGuessSockets.length);
     }
 
     nextTurn(){
-        console.log("NEXTTURN METHOD!**********************************************");
-       console.log('this.gameState.currentTurn ',this.gameState.currentTurn);
-       console.log('this.gameState._turn ',this.gameState._turn);
-       console.log('this.gameState.activeTurnSocket.id ',this.gameState.activeTurnSocket.id);
-       console.log('this.randomWords.length', this.randomWords.length);
-       console.log('this.randomWordCount', this.randomWordCount);
+        //add score to the drawer
+        this.addScoreToDrawer(this.gameState.activeTurnSocket);
 
+        //check if the game is over
         if(this.gameState.currentTurn >= this.randomWords.length){
-            //game over
-            console.log('game over line 44 rooms');
-            this.addScoreToDrawer(this.gameState.activeTurnSocket);
             this.gameState.canvasData = [];
             clearInterval(this.timerInterval);
             return false;
 
         }else{
-            this.addScoreToDrawer(this.gameState.activeTurnSocket);
+            //game is not over so moving on to the next turn
+            //and resetting some resources
             this.gameState._turn = this.gameState.currentTurn++ % this.userSockets.length;
-            console.log("this.gameState._turn after calculation!", this.gameState._turn);
             this.gameState.activeTurnSocket = this.userSockets[this.gameState._turn];
-            console.log("this.gameState.activeTurnSocket.id after calculation!", this.gameState.activeTurnSocket.id);
             this.gameState.activeWord = this.randomWords[this.gameState.currentTurn-1].key;
-            console.log("this.gameState.activeWord after calculation!", this.gameState.activeWord);
             this.gameState.canvasData = [];
-            this.gameState.correctGuessCount = 0;
-            console.log("correctGuessSockets before but cleaning!");
-            console.log(this.correctGuessSockets.length);
             this.correctGuessSockets = [];
-            console.log(this.correctGuessSockets.length);
             this.activeTimerCount = this.timerMaxLimit;
 
         }
@@ -309,9 +358,13 @@ class ActiveRoomList{
     }
 
     getActiveRoomNames(){
-        return this.rooms.map((room) => room.roomName);
+        return this.rooms.map((room) => {
+            return {
+                roomName: room.roomName,
+                slot: room.userSockets.length + ' / '+ room.maxPlayerCount
+            };
+        });
     }
-
 }
 
 

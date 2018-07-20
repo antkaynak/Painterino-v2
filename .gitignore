@@ -8,6 +8,7 @@ frontend/out-tsc
 frontend/package-lock.json
 frontend/firebase.json
 frontend/.firebaserc
+frontend/src/assets/background.jpeg
 
 # Socket
 socket/node_modules

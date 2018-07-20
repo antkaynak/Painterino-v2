@@ -97,7 +97,7 @@ export class CanvasComponent implements OnInit, OnDestroy, AfterViewInit {
 
   private captureEvents(canvasEl: HTMLCanvasElement) {
 
-    // this will capture all mousedown events from teh canvas element
+    // this will capture all mousedown events from the canvas element
       fromEvent(canvasEl, 'mousedown').pipe(
       switchMap((e) => {
         // after a mouse down, we'll record all mouse moves
@@ -138,6 +138,43 @@ export class CanvasComponent implements OnInit, OnDestroy, AfterViewInit {
         });
         this.drawOnCanvas(prevPos, currentPos, this.socketService.toolBar.color, this.socketService.toolBar.size);
       });
+
+
+    fromEvent(canvasEl, 'touchstart').pipe(
+      switchMap((e) => {
+        return fromEvent(canvasEl, 'touchmove').pipe(
+          takeUntil(fromEvent(canvasEl, 'touchend')),
+          pairwise())
+      }))
+      .subscribe((res: [MouseEvent, MouseEvent]) => {
+        //check if the user can draw in this turn
+        if(this.socketService.socket.id !== this.activeTurnSocketId){
+          return;
+        }
+
+        const rect = canvasEl.getBoundingClientRect();
+
+        // previous and current position with the offset
+        const prevPos = {
+          x: res[0].clientX - rect.left,
+          y: res[0].clientY - rect.top
+        };
+
+        const currentPos = {
+          x: res[1].clientX - rect.left,
+          y: res[1].clientY - rect.top
+        };
+
+        this.socketService.subjectXY.next({
+          prevPos,
+          currentPos,
+          color: this.socketService.toolBar.color,
+          size: this.socketService.toolBar.size
+        });
+        this.drawOnCanvas(prevPos, currentPos, this.socketService.toolBar.color, this.socketService.toolBar.size);
+      });
+
+
   }
 
   private clearCanvas(){

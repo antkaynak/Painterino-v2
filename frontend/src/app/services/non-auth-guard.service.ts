@@ -15,10 +15,10 @@ export class NonAuthGuardService implements CanActivate{
       return this.authService.getUser()
         .pipe(map(res=>{
           console.log('?');
-          this.router.navigate(['/rooms']);
+          this.router.navigate(['/lobby/rooms']);
           return false;
         }),catchError( error=>{
-          this.router.navigate(['/login']);
+          this.router.navigate(['/lobby/login']);
           return throwError(error);
         }));
     }else{

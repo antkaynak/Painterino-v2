@@ -9,16 +9,13 @@ export class LobbyEnterGuardService implements CanActivate{
   constructor(private router: Router, private socketService: SocketService) { }
 
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean> | Promise<boolean> | boolean {
-    console.log(this.socketService.gameState);
     if(state.url === '/'){
       //does not matter if we navigate to login or rooms because
       //their guard will decide it anyway.
-      this.router.navigate(['/login']);
-    }else if((state.url === '/score' || state.url === '/wait' ) && this.socketService.gameState === undefined){
-      this.router.navigate(['/rooms']);
+      this.router.navigate(['/lobby/login']);
+    }else if((state.url === '/lobby/score' || state.url === '/lobby/wait' ) && this.socketService.gameState === undefined){
+      this.router.navigate(['/lobby/rooms']);
     }
-    console.log(state);
-    console.log(route);
     return true;
   }
 }

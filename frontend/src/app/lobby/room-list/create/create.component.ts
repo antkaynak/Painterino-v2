@@ -1,5 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-import {Router} from "@angular/router";
 import {SocketService} from "../../../services/socket.service";
 import {MatDialogRef} from "@angular/material";
 import {FormControl, FormGroup, Validators} from "@angular/forms";
@@ -13,14 +12,17 @@ import * as BlankValidator from "../../../services/validators/blank.validator"
 export class CreateComponent implements OnInit {
 
   roomForm: FormGroup;
+  passwordDisabled : boolean = true;
 
-  constructor(private socketService: SocketService, private router: Router,
-              public dialogRef: MatDialogRef<CreateComponent>,) { }
+  constructor(private socketService: SocketService,
+              public dialogRef: MatDialogRef<CreateComponent>) { }
 
   ngOnInit() {
     this.roomForm = new FormGroup({
       'roomName': new FormControl(null,[Validators.required, BlankValidator.checkIfBlankValidator]),
-      'roomPassword': new FormControl(null,[BlankValidator.checkIfBlankValidator])
+      'roomPassword': new FormControl({value: null, disabled: this.passwordDisabled},[BlankValidator.checkIfBlankValidator]),
+      'min': new FormControl('2', [Validators.required]),
+      'max': new FormControl('10', [Validators.required])
     });
   }
 
@@ -31,9 +33,19 @@ export class CreateComponent implements OnInit {
   onSubmitted(){
     const roomName = this.roomForm.controls.roomName.value;
     const roomPassword = this.roomForm.controls.roomPassword.value;
-    this.socketService.selectRoom({roomName, roomPassword});
+    const min = this.roomForm.controls.min.value;
+    const max = this.roomForm.controls.max.value;
+    this.socketService.selectRoom({roomName, roomPassword, min, max});
     this.socketService.connectRoom('create');
     this.dialogRef.close();
   }
 
+  passwordToggle() {
+    this.passwordDisabled = !this.passwordDisabled;
+    if(this.passwordDisabled){
+      this.roomForm.get('roomPassword').disable();
+    }else{
+      this.roomForm.get('roomPassword').enable();
+    }
+  }
 }

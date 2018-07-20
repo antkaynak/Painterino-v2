@@ -24,8 +24,8 @@ export class WaitComponent implements OnInit, OnDestroy {
     if(this.socketService.gameState.game.status === 0){
       this.gameStateSubscription = this.socketService.createGameStateObservable().subscribe( (gameState:any) =>{
         this.socketService.gameState = gameState;
-        if(gameState.game.status === 1){
-          this.router.navigate(['/game']);
+        if(gameState.game.status === 1 && (this.socketService.socket !== null || this.socketService.socket !== undefined)){
+            this.router.navigate(['/game']);
         }else{
           this.activeUserList = gameState.game.userList;
         }

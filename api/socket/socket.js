@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const moment = require('moment');
+
 
 const {Room, activeRoomList} = require('../model/rooms');
 const {User} = require('../model/users');
@@ -10,15 +10,18 @@ const {Word} = require('../model/words');
 let sockets = {};
 sockets.init = function (server) {
 
-
     const io = require('socket.io').listen(server);
     io.on('connection', (socket) => {
-        console.log('A new user is connected.');
 
-        socket.on('join', (params, callback) => {
+        socket.on('join', (params) => {
             if (typeof params.token !== 'string' || typeof params.room.roomName !== 'string'
                 || params.token.trim().length === 0 || params.room.roomName.trim().length === 0) {
-                return callback('Required params! *token *room { roomName }');
+                socket.emit('gameState', {
+                    status: 'fail',
+                    game: null,
+                    errorMessage: 'There are more required fields.'
+                });
+                return;
             }
 
             User.findByToken(params.token).then((user) => {
@@ -27,9 +30,6 @@ sockets.init = function (server) {
                 }
 
                 const room = activeRoomList.getRoom(params.room.roomName);
-                console.log('*********************************************');
-                console.log(room);
-                console.log('*********************************************');
 
                 if (room) {
                     let paramPassword = params.room.roomPassword === null ? null : params.room.roomPassword.trim();
@@ -37,16 +37,28 @@ sockets.init = function (server) {
                     if (room.roomPassword !== paramPassword) {
                         socket.emit('gameState', {
                             status: 'fail',
-                            game: null
+                            game: null,
+                            errorMessage: 'Room password is invalid.'
                         });
-                        return callback('Room password is invalid.');
+                        return;
                     }
                 } else {
                     socket.emit('gameState', {
                         status: 'fail',
-                        game: null
+                        game: null,
+                        errorMessage: 'Room does not exist.'
                     });
-                    return callback('Room does not exist!');
+                    return;
+                }
+
+                //If there are no slots for the player to join
+                if(room.userSockets.length >= room.maxPlayerCount){
+                    socket.emit('gameState', {
+                        status: 'fail',
+                        game: null,
+                        errorMessage: 'Room is full.'
+                    });
+                    return;
                 }
 
                 socket['userName'] = user.username;
@@ -77,18 +89,23 @@ sockets.init = function (server) {
                 console.log(e);
                 socket.emit('gameState', {
                     status: 'fail',
-                    game: null
+                    game: null,
+                    errorMessage: 'Internal server error. Please contact our support team.'
                 });
-                return callback(e);
+                return;
             });
-
         });
 
-        socket.on('create', (params, callback) => {
-            console.log(params);
+        socket.on('create', (params) => {
             if (typeof params.token !== 'string' || typeof params.room.roomName !== 'string'
-                || params.token.trim().length === 0 || params.room.roomName.trim().length === 0) {
-                return callback('Required params! *token *room { roomName }');
+                || params.token.trim().length === 0 || params.room.roomName.trim().length === 0
+                ||params.room.min < 2 || params.room.min > 10 || params.room.max < 2 || params.room.max > 10) {
+                socket.emit('gameState', {
+                    status: 'fail',
+                    game: null,
+                    errorMessage: 'Invalid params.'
+                });
+                return;
             }
 
             User.findByToken(params.token).then((user) => {
@@ -96,23 +113,19 @@ sockets.init = function (server) {
                     return Promise.reject();
                 }
                 const dsRoom = activeRoomList.getRoom(params.room.roomName);
-                console.log('*********************************************');
-                console.log(dsRoom);
-                console.log('*********************************************');
 
                 if (dsRoom) {
                     socket.emit('gameState', {
                         status: 'fail',
-                        game: null
+                        game: null,
+                        errorMessage: 'Room already exists'
                     });
-                    return callback('Room already exists!');
+                    return;
                 }
 
                 let password = params.room.roomPassword === null ? null : params.room.roomPassword.trim();
                 password = password === '' ? null : password;
-                console.log(password);
-                console.log(params.room.roomPassword);
-                let room = new Room(io, params.room.roomName, password);
+                let room = new Room(io, params.room.roomName, password, params.room.min, params.room.max);
                 room.addUser(socket);
                 activeRoomList.addRoom(room);
 
@@ -127,26 +140,15 @@ sockets.init = function (server) {
 
                 Word.findRandom({}, {}, {limit: room.randomWordCount}, function (err, result) {
                     if (err || !result || result.length < room.randomWordCount) {
-                        //TODO add a fail safe event so that the game cancels on an error.
+                        socket.emit('gameState', {
+                            status: 'fail',
+                            game: null,
+                            errorMessage: 'Internal server error. Please contact our support team.'
+                        });
                         return;
                     }
 
-                    console.log(result);
                     room.randomWords = result;
-
-                    // socket.emit('gameState', {
-                    //     status: 'success',
-                    //     game: {
-                    //         status: room.gameState.status,
-                    //         _turn: room.gameState._turn,
-                    //         currentTurn: room.gameState.currentTurn,
-                    //         activeTurnSocketId: null,
-                    //         activeWord: null,
-                    //         canvasData: [],
-                    //         chatData: [],
-                    //         userList: room.getActiveUsers(),
-                    //     }
-                    // });
 
                     room.sendGameStateToSocket(socket);
 
@@ -156,17 +158,15 @@ sockets.init = function (server) {
                 console.log(e);
                 socket.emit('gameState', {
                     status: 'fail',
-                    game: null
+                    game: null,
+                    errorMessage: 'Internal server error. Please contact our support team.'
                 });
-                return callback(e);
+                return;
             });
 
         });
 
         socket.on('disconnect', () => {
-            console.log('A user was disconnected');
-            console.log(io.sockets.adapter.rooms);
-            //TODO check if only a single user is left if so end the game set the game status 0 or 2
             if (socket['roomName'] === undefined) {
                 return;
             }
@@ -177,11 +177,8 @@ sockets.init = function (server) {
             const user = room.removeUser(socket);
             if (user) {
                 if (room.userSockets.length <= 1) {
-                    room.gameFailedOver(io, socket['roomName']);
-                    console.log('DELETED THE ROOM', socket['roomName']);
+                    room.gameFailedOver();
                     socket.leave(socket['roomName']);
-                    console.log(io.sockets.adapter.rooms);
-
                 } else {
                     if (room.gameState.activeTurnSocket === socket) {
                         room.gameState._turn--;
@@ -206,73 +203,11 @@ sockets.init = function (server) {
         });
 
         socket.on('createMessage', (message, callback) => {
-            if (socket['token'] === undefined) {
+            if (socket['token'] === undefined || socket['token'] === null) {
                 return;
             }
             const room = activeRoomList.getRoom(socket['roomName']);
-
-            if (room.gameState.activeWord.trim().toLowerCase() === JSON.parse(message).message.text.trim().toLowerCase()
-                && room.gameState.activeTurnSocket !== socket) {
-                console.log('Correct guess!');
-                console.log('socket', socket['userName']);
-
-                if (!room.checkIfAlreadyGuessed(socket)) {
-                    console.log('Not already guessed!');
-                    room.addScore(socket);
-                } else {
-                    console.log('Already guessed!');
-                    message = JSON.parse(message);
-                    message.message.userName = socket['userName'];
-                    room.pushChatData(message);
-                    socket.broadcast.to(socket['roomName']).emit('receiveMessage', {
-                        message: JSON.stringify(message)
-                    });
-                    return;
-                }
-                console.log('correctGuessCount ', room.gameState.correctGuessCount);
-                console.log('userSockets.length ', room.userSockets.length);
-
-                //There is a -1 because a player is drawing and cannot guess
-                if (room.gameState.correctGuessCount === room.userSockets.length - 1) {
-                    if (room.nextTurn()) {
-                        console.log("NEXT TURN AVAILABLE");
-                        room.sendGameStateToActiveSocket();
-                        room.sendGameStateToOtherSockets();
-
-                    } else {
-                        console.log("NEXT TURN NO NO GAME OVER");
-                        return room.gameOver(io,socket['roomName']);
-                    }
-                } else {
-                    console.log('THERE ARE PLAYERS WHO DID NOT GUESS!');
-
-                    room.sendGameStateToActiveSocket();
-                    room.sendGameStateToOtherSockets();
-                }
-
-                room.pushChatData(message);
-                const sendMessage = {
-                    message: {
-                        text: socket['userName'] + ' guessed correctly!',
-                        createdAt: moment().valueOf(),
-                        userName: ''
-                    }
-                };
-                io.to(socket['roomName']).emit('receiveMessage', {
-                    message: JSON.stringify(sendMessage)
-                });
-
-
-            } else {
-                console.log('just a normal message');
-                message = JSON.parse(message);
-                message.message.userName = socket['userName'];
-                room.pushChatData(message);
-                socket.broadcast.to(socket['roomName']).emit('receiveMessage', {
-                    message: JSON.stringify(message)
-                });
-            }
-            console.log('callback();');
+            room.checkIfGuessed(socket, message);
             callback();
         });
     });

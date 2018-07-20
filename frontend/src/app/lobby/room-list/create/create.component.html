@@ -1,7 +1,6 @@
 <h1 mat-dialog-title>Create a room</h1>
 <div mat-dialog-content>
-
-  <form [formGroup]="roomForm" (ngSubmit)="onSubmitted()">
+  <form [formGroup]="roomForm" (ngSubmit)="onSubmitted()" style="overflow: hidden">
     <div class="form-group">
       <mat-form-field>
         <input type="text"
@@ -13,7 +12,6 @@
                [maxlength]="12"
                matInput
         >
-        <mat-hint>Crazy Potato</mat-hint>
         <mat-error *ngIf="true">
           Please enter a valid room name
         </mat-error>
@@ -34,9 +32,26 @@
         >
       </mat-form-field>
 
+      <mat-form-field style="display: inline-block; width: 50%;">
+        <mat-select name="min" id="min" [formControlName]="'min'" placeholder="Min" >
+          <mat-option *ngFor="let number of [2,3,4,5,6,7,8,9,10]" value="{{number}}">
+            {{number}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field style="display: inline-block; width: 50%;">
+        <mat-select name="max" id="max" [formControlName]="'max'" placeholder="Max" >
+          <mat-option *ngFor="let number of [2,3,4,5,6,7,8,9,10]" value="{{number}}">
+            {{number}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
     </div>
 
-    <div mat-dialog-actions class="buttons">
+    <div mat-dialog-actions class="buttons" style="margin-bottom: 0">
+      <mat-slide-toggle (change)="passwordToggle()">Password</mat-slide-toggle>
       <button mat-raised-button type="button" (click)="cancel()">Cancel</button>
       <button mat-raised-button type="submit">Create Room</button>
     </div>

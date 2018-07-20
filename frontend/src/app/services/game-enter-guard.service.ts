@@ -10,7 +10,7 @@ export class GameEnterGuardService implements CanActivate{
 
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean> | Promise<boolean> | boolean {
     if(this.socketService.socket === undefined || this.socketService.socket === null){
-      this.router.navigate(['/login']);
+      this.router.navigate(['/lobby/login']);
       return false;
     }
     return true;

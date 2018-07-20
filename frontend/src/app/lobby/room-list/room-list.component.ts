@@ -1,6 +1,5 @@
-import {Component, ElementRef, OnDestroy, OnInit} from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import {Subscription} from "rxjs/internal/Subscription";
-import {Router} from "@angular/router";
 import {SocketService} from "../../services/socket.service";
 import {MatDialog} from "@angular/material";
 import {CreateComponent} from "./create/create.component";
@@ -13,8 +12,6 @@ import {JoinComponent} from "./join/join.component";
 })
 export class RoomListComponent implements OnInit, OnDestroy {
 
-
-
   activeRooms: any = [];
   activeRoomsSubscription: Subscription;
 
@@ -24,7 +21,6 @@ export class RoomListComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.activeRoomsSubscription = this.socketService.getActiveRooms()
       .subscribe(data=>{
-        console.log(data);
         this.activeRooms = data;
       });
   }
@@ -37,25 +33,16 @@ export class RoomListComponent implements OnInit, OnDestroy {
 
   openCreate() {
     this.dialog.closeAll();
-    const dialogRef = this.dialog.open(CreateComponent, {
-      width: '400px'
-    });
-
-    dialogRef.afterClosed().subscribe(result => {
-      console.log('The dialog was closed', result);
+    this.dialog.open(CreateComponent, {
+      width: '500px'
     });
   }
 
   openJoin(roomName) {
     this.dialog.closeAll();
-    console.log('hey', roomName);
-    const dialogRef = this.dialog.open(JoinComponent, {
-      width: '400px',
-      data: {roomName}
-    });
-
-    dialogRef.afterClosed().subscribe(result => {
-      console.log('The dialog was closed', result);
+    this.dialog.open(JoinComponent, {
+      width: '500px',
+      data: roomName
     });
   }
 }

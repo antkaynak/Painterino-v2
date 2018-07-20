@@ -18,11 +18,11 @@ export class AuthGuardService implements CanActivate{
           // this.router.navigate(['/rooms']);
           return true;
         }),catchError( error=>{
-          this.router.navigate(['/login']);
+          this.router.navigate(['/lobby/login']);
           return throwError(error);
         }));
     }else{
-      this.router.navigate(['/login']);
+      this.router.navigate(['/lobby/login']);
       return false;
     }
   }

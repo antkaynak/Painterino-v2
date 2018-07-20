@@ -1,7 +1,7 @@
 <h1 mat-dialog-title>Join a room</h1>
 <div mat-dialog-content>
 
-  <form [formGroup]="roomForm" (ngSubmit)="onSubmitted()">
+  <form [formGroup]="roomForm" (ngSubmit)="onSubmitted()" style="overflow: hidden">
     <div class="form-group">
       <mat-form-field>
         <input type="text"
@@ -35,7 +35,7 @@
 
     </div>
 
-    <div mat-dialog-actions class="buttons">
+    <div mat-dialog-actions class="buttons" style="margin-bottom: 0">
       <button mat-raised-button type="button" (click)="cancel()">Cancel</button>
       <button mat-raised-button type="submit">Join</button>
     </div>

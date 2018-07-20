@@ -4,10 +4,9 @@
   <div fxFlex="60%" class="left-panel">
     <mat-list class="room-list" style="overflow-y: auto; height: 100%">
       <mat-list-item (click)="openJoin(room)" *ngFor="let room of activeRooms">
-        <mat-card>
-          <div class="room">
-          {{room}}
-          </div>
+        <mat-card style="width: 100%; margin-bottom: 20px">
+          <p style="margin: 0; padding: 0; display: inline-block">{{room.roomName}}</p>
+          <p style="margin: 0; padding: 0; display: inline-block; float: right">{{room.slot}}</p>
         </mat-card>
       </mat-list-item>
     </mat-list>

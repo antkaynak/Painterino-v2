@@ -3,10 +3,16 @@ import {CommonModule} from '@angular/common';
 import {
   MatAutocompleteModule,
   MatButtonModule,
-  MatCardModule, MatDialogModule,
+  MatCardModule,
+  MatDialogModule,
   MatFormFieldModule,
   MatInputModule,
-  MatListModule, MatSliderModule, MatTableModule, MatToolbarModule
+  MatListModule,
+  MatProgressBarModule, MatSelectModule,
+  MatSliderModule,
+  MatSlideToggleModule,
+  MatTableModule,
+  MatToolbarModule
 } from "@angular/material";
 
 
@@ -22,7 +28,10 @@ const modules = [
   MatDialogModule,
   MatSliderModule,
   MatToolbarModule,
-  MatTableModule
+  MatTableModule,
+  MatProgressBarModule,
+  MatSlideToggleModule,
+  MatSelectModule
 ];
 
 @NgModule({

@@ -14,20 +14,16 @@ export class UserListComponent implements OnInit, OnDestroy {
   currentTurn: number;
   userListSubscription: Subscription;
 
-  constructor(private socketService: SocketService, private router: Router) { }
+  constructor(private socketService: SocketService) { }
 
   ngOnInit() {
     this.userList = this.socketService.gameState.game.userList;
     this.currentTurn = this.socketService.gameState.game.currentTurn;
 
-    //TODO fix this...
     this.userListSubscription = this.socketService.createGameStateObservable().subscribe((gameState:any)=>{
       if(gameState.status === 'over'){
-          console.log('USER-LIST COMPONENT ' ,gameState);
-          this.socketService.endGameScoreBoard = gameState.scoreBoard;
-          return this.router.navigate(['/score']);
+          return;
       }
-      console.log("user-list 22 " ,gameState);
       this.userList = gameState.game.userList;
       this.currentTurn = gameState.game.currentTurn;
     });

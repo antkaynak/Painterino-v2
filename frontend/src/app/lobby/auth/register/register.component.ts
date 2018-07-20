@@ -30,16 +30,13 @@ export class RegisterComponent implements OnInit {
   }
 
   onSubmitted(){
-    console.log('submitted');
     const email = this.registerForm.value.email;
     const username = this.registerForm.value.username;
     const password = this.registerForm.value.passwordGroup.password;
     const passwordConfirm = this.registerForm.value.passwordGroup.passwordConfirm;
-    console.log(email);
-    console.log(password);
     this.authService.register(email, username,password,passwordConfirm).subscribe(res => {
       console.log(res);
-      this.router.navigate(['/rooms']);
+      this.router.navigate(['/lobby/rooms']);
     });
   }
 

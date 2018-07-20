@@ -5,10 +5,10 @@ import {Router} from "@angular/router";
 
 @Component({
   selector: 'app-main',
-  templateUrl: './main.component.html',
-  styleUrls: ['./main.component.css']
+  templateUrl: './game.component.html',
+  styleUrls: ['./game.component.css']
 })
-export class MainComponent implements OnInit, OnDestroy {
+export class GameComponent implements OnInit, OnDestroy {
 
   constructor(private socketService: SocketService, private router: Router) { }
 

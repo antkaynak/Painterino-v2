@@ -1,8 +1,9 @@
 <div style="background-color: #323232; height: 100%">
   <div *ngFor="let user of userList; let i = index">
-    <mat-card [style.backgroundColor]=" ( (i+1) % userList.length)  == currentTurn ? 'gray' : 'white'">
+    <mat-card [style.backgroundColor]="  _turn === i ? 'gray' : 'white'">
         <p style="padding: 0;margin: 0;font-size: 1.25em; display: inline-block">{{user.userName}}</p>
         <p style="padding: 0;margin:0; margin-left: auto !important; display: inline-block; font-size: 1.25em; float:right">{{user.score}}</p>
     </mat-card>
   </div>
 </div>
+

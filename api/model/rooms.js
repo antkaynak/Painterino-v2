@@ -1,5 +1,7 @@
 const moment = require('moment');
 
+
+//TODO active turn calculation is wrong fix it...
 class Room{
 
     constructor(io, roomName, roomPassword, minPlayerCount, maxPlayerCount){
@@ -10,13 +12,15 @@ class Room{
         this.userSockets = [];
         this.randomWords= [];
         this.correctGuessSockets = [];
+
+        //Room limits
+        this.randomWordCount= 4;
         this.minPlayerCount = minPlayerCount;
         this.maxPlayerCount = maxPlayerCount;
 
         //Timer
         this.timerMaxLimit = 60;
         this.activeTimerCount = -1;
-        this.randomWordCount= 4;
         this.timerInterval = null;
 
         //gameState the server stores
@@ -216,6 +220,9 @@ class Room{
         }else{
             //game is not over so moving on to the next turn
             //and resetting some resources
+            console.log('userSocketsLength ', this.userSockets.length);
+            console.log('ct ', this.gameState.currentTurn);
+            console.log('_t ', this.gameState._turn);
             this.gameState._turn = this.gameState.currentTurn++ % this.userSockets.length;
             this.gameState.activeTurnSocket = this.userSockets[this.gameState._turn];
             this.gameState.activeWord = this.randomWords[this.gameState.currentTurn-1].key;
@@ -223,9 +230,10 @@ class Room{
             this.correctGuessSockets = [];
             this.activeTimerCount = this.timerMaxLimit;
 
+            console.log(this.gameState);
+
         }
         return true;
-
     }
 
     sendGameStateToActiveSocket(){
@@ -236,7 +244,7 @@ class Room{
                     status: this.gameState.status,
                     _turn: this.gameState._turn,
                     currentTurn: this.gameState.currentTurn,
-                    activeTurnSocketId: this.gameState.activeTurnSocket.id,
+                    activeTurnSocketId: this.gameState.activeTurnSocket === null ? null : this.gameState.activeTurnSocket.id,
                     activeWord: this.gameState.activeWord,
                     canvasData: this.gameState.canvasData,
                     chatData: this.gameState.chatData,
@@ -253,7 +261,7 @@ class Room{
                     status: this.gameState.status,
                     _turn: this.gameState._turn,
                     currentTurn: this.gameState.currentTurn,
-                    activeTurnSocketId: this.gameState.activeTurnSocket.id,
+                    activeTurnSocketId: this.gameState.activeTurnSocket === null ? null : this.gameState.activeTurnSocket.id,
                     activeWord: '',
                     canvasData: this.gameState.canvasData,
                     chatData: this.gameState.chatData,

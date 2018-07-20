@@ -9,7 +9,7 @@ export class LobbyEnterGuardService implements CanActivate{
   constructor(private router: Router, private socketService: SocketService) { }
 
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean> | Promise<boolean> | boolean {
-    if(state.url === '/'){
+    if(state.url === '/lobby'){
       //does not matter if we navigate to login or rooms because
       //their guard will decide it anyway.
       this.router.navigate(['/lobby/login']);

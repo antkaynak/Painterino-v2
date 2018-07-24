@@ -1,7 +1,15 @@
 const moment = require('moment');
 
 
+//TODO min-max range should match  (eg min 7 max 2 should not be allowed)  +
 //TODO active turn calculation is wrong fix it...
+//TODO there are no sign out +
+//TODO screen size differs... fix it with painterino source code
+//TODO one account should only be active in one room
+//TODO point score system should decrease 100 points for every guess +
+//TODO scoreboard should score highest point to lowest. +
+//TODO refresh button in the waiting room
+//TODO key button...
 class Room{
 
     constructor(io, roomName, roomPassword, minPlayerCount, maxPlayerCount){
@@ -102,6 +110,10 @@ class Room{
             });
         }
 
+        scoreBoard.sort(function (a, b) {
+           return a.score - b.score;
+        });
+
         //send game over event
         this.io.to(this.roomName).emit('gameState',
             {
@@ -118,7 +130,7 @@ class Room{
     }
 
     gameFailedOver(){
-        let scoreBoard = [{position: 0, score: 0, userName: 'Everyone left the game!'}];
+        let scoreBoard = [{position: '', score: '', userName: 'Everyone left the game!'}];
 
         //send game over event
         this.io.to(this.roomName).emit('gameState',
@@ -197,9 +209,10 @@ class Room{
 
 
     addScore(userSocket){
+        userSocket.score += (1000 - this.correctGuessSockets.length);
         //adding score means player guessed
         this.correctGuessSockets.push(userSocket);
-        userSocket.score += Math.round(900 / this.correctGuessSockets.length);
+
     }
 
     addScoreToDrawer(userSocket){

@@ -4,6 +4,8 @@ import {SocketService} from "../../services/socket.service";
 import {MatDialog} from "@angular/material";
 import {CreateComponent} from "./create/create.component";
 import {JoinComponent} from "./join/join.component";
+import {AuthService} from "../../services/auth.service";
+import {Router} from "@angular/router";
 
 @Component({
   selector: 'app-room-list',
@@ -15,7 +17,8 @@ export class RoomListComponent implements OnInit, OnDestroy {
   activeRooms: any = [];
   activeRoomsSubscription: Subscription;
 
-  constructor(private socketService: SocketService, public dialog: MatDialog) { }
+  constructor(private socketService: SocketService, private authService: AuthService,
+              private router: Router, public dialog: MatDialog) { }
 
 
   ngOnInit() {
@@ -44,5 +47,11 @@ export class RoomListComponent implements OnInit, OnDestroy {
       width: '500px',
       data: roomName
     });
+  }
+
+  logOut(){
+    this.authService.logOut().subscribe( () =>{
+      this.router.navigate(['/lobby/login']);
+    })
   }
 }

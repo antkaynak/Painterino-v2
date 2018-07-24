@@ -82,14 +82,13 @@ export class AuthService {
   }
 
   logOut(){
-    this.http.delete(this.url+"/users/me/token")
+    return this.http.delete(this.url+"/users/me/token")
       .pipe(catchError(error => {
         console.log(error);
         this.removeSession();
         return throwError(error);
-      }))
-      .subscribe(res => {
-      this.removeSession();
-    })
+      }), map(res => {
+        this.removeSession();
+      }));
   }
 }

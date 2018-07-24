@@ -12,10 +12,11 @@
     </mat-list>
   </div>
   <div fxFlex="40%" class="right-panel" style="border-left: 1px solid rgba(0,0,0,.30)">
-    <mat-list>
+    <mat-list style="position: relative; height: 100%">
       <mat-list-item><button mat-raised-button (click)="openJoin('')">Join</button></mat-list-item>
       <mat-list-item><button mat-raised-button>Enter Key</button></mat-list-item>
       <mat-list-item><button mat-raised-button (click)="openCreate()">Create</button></mat-list-item>
+      <mat-list-item style="position: absolute; bottom: 0; width: 100%"><button mat-raised-button (click)="logOut()">Logout</button></mat-list-item>
     </mat-list>
   </div>
 </div>

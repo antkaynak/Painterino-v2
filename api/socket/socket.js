@@ -98,12 +98,23 @@ sockets.init = function (server) {
 
         socket.on('create', (params) => {
             if (typeof params.token !== 'string' || typeof params.room.roomName !== 'string'
-                || params.token.trim().length === 0 || params.room.roomName.trim().length === 0
-                ||params.room.min < 2 || params.room.min > 10 || params.room.max < 2 || params.room.max > 10) {
+                || params.token.trim().length === 0 || params.room.roomName.trim().length === 0) {
+                console.log(params);
                 socket.emit('gameState', {
                     status: 'fail',
                     game: null,
                     errorMessage: 'Invalid params.'
+                });
+                return;
+            }
+            const min = parseInt(params.room.min);
+            const max = parseInt(params.room.max);
+            if(min < 2 || min > 10 || max < 2 || max > 10 || min > max){
+                console.log(params);
+                socket.emit('gameState', {
+                    status: 'fail',
+                    game: null,
+                    errorMessage: 'Invalid room limits.'
                 });
                 return;
             }
@@ -125,7 +136,7 @@ sockets.init = function (server) {
 
                 let password = params.room.roomPassword === null ? null : params.room.roomPassword.trim();
                 password = password === '' ? null : password;
-                let room = new Room(io, params.room.roomName, password, params.room.min, params.room.max);
+                let room = new Room(io, params.room.roomName, password, min, max);
                 room.addUser(socket);
                 activeRoomList.addRoom(room);
 

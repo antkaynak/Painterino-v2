@@ -65,22 +65,19 @@ export class CanvasComponent implements OnInit, OnDestroy, AfterViewInit {
 
   @HostListener('window:resize', ['$event'])
   sizeChange(event) {
-    const canvasEl = this.canvas.nativeElement;
-    canvasEl.width = this.canvasDiv.nativeElement.offsetWidth;
-    canvasEl.height = this.canvasDiv.nativeElement.offsetHeight;
+    this.canvas.nativeElement.style.width = this.canvasDiv.nativeElement.offsetWidth+'px';
+    this.canvas.nativeElement.style.height = this.canvasDiv.nativeElement.offsetHeight+'px';
   }
 
   private cx: CanvasRenderingContext2D;
 
   public ngAfterViewInit() {
-
     // get the context
     const canvasEl: HTMLCanvasElement = this.canvas.nativeElement;
     this.cx = canvasEl.getContext('2d');
     // set the width and height
-    canvasEl.width = this.canvasDiv.nativeElement.offsetWidth;
-    canvasEl.height = this.canvasDiv.nativeElement.offsetHeight;
-
+    this.canvas.nativeElement.style.width = this.canvasDiv.nativeElement.offsetWidth+'px';
+    this.canvas.nativeElement.style.height = this.canvasDiv.nativeElement.offsetHeight+'px';
 
     // set some default properties about the line
     this.cx.lineWidth = this.socketService.toolBar.size;
@@ -95,8 +92,22 @@ export class CanvasComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
-  private captureEvents(canvasEl: HTMLCanvasElement) {
 
+    getMousePos(clientX, clientY) {
+
+    const rect = this.canvas.nativeElement.getBoundingClientRect();
+    let X = (clientX - rect.left) / (this.canvas.nativeElement.clientWidth / this.canvas.nativeElement.width);
+    let Y = (clientY - rect.top) / (this.canvas.nativeElement.clientHeight / this.canvas.nativeElement.height);
+    X = Math.ceil(X);
+    Y = Math.ceil(Y);
+    return {
+      x: X,
+      y: Y
+    };
+  }
+
+
+  private captureEvents(canvasEl: HTMLCanvasElement) {
     // this will capture all mousedown events from the canvas element
       fromEvent(canvasEl, 'mousedown').pipe(
       switchMap((e) => {
@@ -117,18 +128,8 @@ export class CanvasComponent implements OnInit, OnDestroy, AfterViewInit {
           return;
         }
 
-        const rect = canvasEl.getBoundingClientRect();
-
-        // previous and current position with the offset
-        const prevPos = {
-          x: res[0].clientX - rect.left,
-          y: res[0].clientY - rect.top
-        };
-
-        const currentPos = {
-          x: res[1].clientX - rect.left,
-          y: res[1].clientY - rect.top
-        };
+        const prevPos = this.getMousePos(res[0].clientX, res[0].clientY);
+        const currentPos = this.getMousePos(res[1].clientX, res[1].clientY);
 
         this.socketService.subjectXY.next({
           prevPos,
@@ -151,19 +152,9 @@ export class CanvasComponent implements OnInit, OnDestroy, AfterViewInit {
         if(this.socketService.socket.id !== this.activeTurnSocketId){
           return;
         }
-
-        const rect = canvasEl.getBoundingClientRect();
-
         // previous and current position with the offset
-        const prevPos = {
-          x: res[0].clientX - rect.left,
-          y: res[0].clientY - rect.top
-        };
-
-        const currentPos = {
-          x: res[1].clientX - rect.left,
-          y: res[1].clientY - rect.top
-        };
+        const prevPos = this.getMousePos(res[0].clientX, res[0].clientY);
+        const currentPos = this.getMousePos(res[1].clientX, res[1].clientY);
 
         this.socketService.subjectXY.next({
           prevPos,
@@ -179,6 +170,7 @@ export class CanvasComponent implements OnInit, OnDestroy, AfterViewInit {
 
   private clearCanvas(){
     this.cx.clearRect(0,0,this.canvasDiv.nativeElement.offsetWidth, this.canvasDiv.nativeElement.offsetHeight);
+    // this.cx.clearRect(0,0,this.canvas.nativeElement.width, this.canvas.nativeElement.height);
   }
 
   private drawOnCanvas(prevPos: { x: number, y: number }, currentPos: { x: number, y: number }, color, size) {
@@ -187,6 +179,7 @@ export class CanvasComponent implements OnInit, OnDestroy, AfterViewInit {
 
     // start our drawing path
     this.cx.beginPath();
+
 
     // we're drawing lines so we need a previous position
     if (prevPos) {

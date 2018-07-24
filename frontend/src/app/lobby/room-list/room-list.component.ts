@@ -6,6 +6,7 @@ import {CreateComponent} from "./create/create.component";
 import {JoinComponent} from "./join/join.component";
 import {AuthService} from "../../services/auth.service";
 import {Router} from "@angular/router";
+import {first, tap} from "rxjs/operators";
 
 @Component({
   selector: 'app-room-list',
@@ -16,6 +17,7 @@ export class RoomListComponent implements OnInit, OnDestroy {
 
   activeRooms: any = [];
   activeRoomsSubscription: Subscription;
+  isRefreshActive: boolean = false;
 
   constructor(private socketService: SocketService, private authService: AuthService,
               private router: Router, public dialog: MatDialog) { }
@@ -25,6 +27,7 @@ export class RoomListComponent implements OnInit, OnDestroy {
     this.activeRoomsSubscription = this.socketService.getActiveRooms()
       .subscribe(data=>{
         this.activeRooms = data;
+        this.isRefreshActive = true;
       });
   }
 
@@ -53,5 +56,16 @@ export class RoomListComponent implements OnInit, OnDestroy {
     this.authService.logOut().subscribe( () =>{
       this.router.navigate(['/lobby/login']);
     })
+  }
+
+  refreshList() {
+    this.isRefreshActive = false;
+    this.socketService.getActiveRooms()
+      .pipe(first(), tap( data => {
+        this.activeRooms = data;
+        this.isRefreshActive = true;
+        })
+      )
+      .subscribe();
   }
 }

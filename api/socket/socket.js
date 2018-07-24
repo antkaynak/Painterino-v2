@@ -185,6 +185,19 @@ sockets.init = function (server) {
             if (room === undefined || room === null) {
                 return;
             }
+            if(room.gameState.status === 0){
+                if(room.userSockets.length <= 1){
+                    room.gameFailedOver();
+                    socket.leave(socket['roomName']);
+                    return;
+                }else{
+                    room.removeUser(socket);
+                    socket.leave(socket['roomName']);
+                    room.sendGameStateToAllSockets();
+                    return;
+                }
+
+            }
             const user = room.removeUser(socket);
             if (user) {
                 if (room.userSockets.length <= 1) {
@@ -192,8 +205,8 @@ sockets.init = function (server) {
                     socket.leave(socket['roomName']);
                 } else {
                     if (room.gameState.activeTurnSocket === socket) {
-                        room.gameState._turn--;
-                        room.nextTurn();
+                        // room.gameState._turn--;
+                        room.nextTurn(true);
                     }
                     room.sendGameStateToActiveSocket();
                     room.sendGameStateToOtherSockets();

@@ -13,6 +13,8 @@ export class ToolbarComponent implements OnInit, OnDestroy {
 
   timerSubscription: Subscription = null;
   timerValue = 0;
+  latencySubscription: Subscription = null;
+  latency = 0;
 
   activeWord = "error";
   activeWordSubscription: Subscription = null;
@@ -21,6 +23,7 @@ export class ToolbarComponent implements OnInit, OnDestroy {
   constructor(private socketService: SocketService, private router: Router, private cpService: ColorPickerService) { }
 
   ngOnInit() {
+    // this.socketService.listenDisconnect();
     this.activeWord = this.socketService.gameState.game.activeWord;
     this.activeWordSubscription = this.socketService.createGameStateObservable().subscribe((gameState:any) => {
       if(gameState.status === 'over'){
@@ -32,13 +35,22 @@ export class ToolbarComponent implements OnInit, OnDestroy {
     this.timerSubscription = this.socketService.connectToTimer().subscribe( (data: any)=> {
       this.timerValue = data.tick;
     });
+
+    this.latencySubscription = this.socketService.connectToLatency().subscribe((data:number) => this.latency = data);
   }
 
+
   ngOnDestroy() {
+    this.socketService.toolBar.color = '#000000';
+    this.socketService.toolBar.size=  3;
     if(this.activeWordSubscription !== undefined || this.activeWordSubscription !== null){
       this.activeWordSubscription.unsubscribe();
-      this.socketService.toolBar.color = '#000000';
-      this.socketService.toolBar.size=  3;
+    }
+    if(this.latencySubscription !== undefined || this.latencySubscription !== null){
+      this.latencySubscription.unsubscribe();
+    }
+    if(this.timerSubscription !== undefined || this.timerSubscription !== null){
+      this.timerSubscription.unsubscribe();
     }
   }
 

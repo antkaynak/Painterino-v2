@@ -1,15 +1,15 @@
-<div fxLayout="row" fxLayout.xs="column" fxLayoutWrap fxLayoutGap="0.5%" fxLayoutAlign="center" style="overflow: hidden">
-    <div fxFlex="20%" class="left-panel"><app-user-list></app-user-list></div>
-    <div fxFlex="60%" class="canvas-panel">
+<div fxLayout="row" fxLayout.xs="column" fxLayoutWrap fxLayoutGap="0.5%" fxLayoutAlign="center" style="height: 100%">
+    <div fxFlex="20%" fxFlex.xs="10%" fxFlexOrder.xs="3" class="left-panel"><app-user-list></app-user-list></div>
+    <div fxFlex="60%" fxFlex.xs="70%" fxFlexOrder.xs="1" class="canvas-panel">
       <div fxLayout="column" fxLayoutAlign="center" style="height: 100%;">
-        <div fxFlex="90%">
+        <div fxFlex="90%" fxFlex.xs="80%">
           <app-canvas></app-canvas>
         </div>
-        <div fxFlex="10%">
+        <div fxFlex="10%" fxFlex.xs="20%">
           <app-toolbar></app-toolbar>
         </div>
       </div>
     </div>
-    <div fxFlex="20%" class="right-panel"><app-chat></app-chat></div>
+    <div fxFlex="20%" fxFlex.xs="20%" fxFlexOrder.xs="2" class="right-panel"><app-chat></app-chat></div>
 </div>
 

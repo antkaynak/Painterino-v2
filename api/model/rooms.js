@@ -1,15 +1,11 @@
 const moment = require('moment');
 
 
-//TODO min-max range should match  (eg min 7 max 2 should not be allowed)  +
 //TODO active turn calculation is wrong fix it...
-//TODO there are no sign out +
-//TODO screen size differs... fix it with painterino source code
+
 //TODO one account should only be active in one room
-//TODO point score system should decrease 100 points for every guess +
-//TODO scoreboard should score highest point to lowest. +
-//TODO refresh button in the waiting room
-//TODO key button...
+
+
 class Room{
 
     constructor(io, roomName, roomPassword, minPlayerCount, maxPlayerCount){
@@ -22,7 +18,7 @@ class Room{
         this.correctGuessSockets = [];
 
         //Room limits
-        this.randomWordCount= 4;
+        this.randomWordCount= 10;
         this.minPlayerCount = minPlayerCount;
         this.maxPlayerCount = maxPlayerCount;
 
@@ -50,7 +46,8 @@ class Room{
             this.gameState.activeWord = this.randomWords[0].key;
 
             //The _turn variable stores the array indexes of the current turns.
-            this.gameState._turn = this.gameState.currentTurn++ % this.userSockets.length;
+            this.gameState._turn = 0;
+            this.gameState.currentTurn++;
 
             this.gameState.activeTurnSocket = this.userSockets[this.gameState._turn];
 
@@ -86,7 +83,7 @@ class Room{
 
     timerOver(){
         //if there are a next turn available
-        if(this.nextTurn()){
+        if(this.nextTurn(false)){
             this.sendGameStateToActiveSocket();
             this.sendGameStateToOtherSockets(this.roomName);
         }else{
@@ -111,8 +108,13 @@ class Room{
         }
 
         scoreBoard.sort(function (a, b) {
-           return a.score - b.score;
+           return b.score - a.score;
         });
+
+        for (let i = 0; i < this.userSockets.length; i++) {
+            //plus 1 because we want to start from 1 not index 0
+            scoreBoard[i].position = (i+1);
+        }
 
         //send game over event
         this.io.to(this.roomName).emit('gameState',
@@ -162,7 +164,7 @@ class Room{
             }
             //There is a -1 because a player is drawing and cannot guess
             if (this.correctGuessSockets.length === this.userSockets.length - 1) {
-                if (this.nextTurn()) {
+                if (this.nextTurn(false)) {
                     this.sendGameStateToActiveSocket();
                     this.sendGameStateToOtherSockets();
 
@@ -209,7 +211,7 @@ class Room{
 
 
     addScore(userSocket){
-        userSocket.score += (1000 - this.correctGuessSockets.length);
+        userSocket.score += (1000 - (this.correctGuessSockets.length * 100));
         //adding score means player guessed
         this.correctGuessSockets.push(userSocket);
 
@@ -220,7 +222,7 @@ class Room{
         userSocket.score += Math.round(100 * this.correctGuessSockets.length);
     }
 
-    nextTurn(){
+    nextTurn(activeTurnSocketLeft){
         //add score to the drawer
         this.addScoreToDrawer(this.gameState.activeTurnSocket);
 
@@ -233,18 +235,22 @@ class Room{
         }else{
             //game is not over so moving on to the next turn
             //and resetting some resources
-            console.log('userSocketsLength ', this.userSockets.length);
-            console.log('ct ', this.gameState.currentTurn);
-            console.log('_t ', this.gameState._turn);
-            this.gameState._turn = this.gameState.currentTurn++ % this.userSockets.length;
+
+            //if the leaving socket is the one the actively drawing do not change the index
+            if(!activeTurnSocketLeft){
+                this.gameState._turn = this.gameState.currentTurn++ % this.userSockets.length;
+            }else{
+                //this means the drawing player who left was the last player in the list
+                if(this.gameState._turn === this.userSockets.length){
+                    this.gameState._turn = 0;
+                }
+                this.gameState.currentTurn++;
+            }
             this.gameState.activeTurnSocket = this.userSockets[this.gameState._turn];
             this.gameState.activeWord = this.randomWords[this.gameState.currentTurn-1].key;
             this.gameState.canvasData = [];
             this.correctGuessSockets = [];
             this.activeTimerCount = this.timerMaxLimit;
-
-            console.log(this.gameState);
-
         }
         return true;
     }
@@ -267,6 +273,10 @@ class Room{
     }
 
     sendGameStateToOtherSockets(){
+        let hint = '';
+        for(let i = 0; i < this.gameState.activeWord.length; i++){
+            hint += '_ '
+        }
         this.gameState.activeTurnSocket.to(this.roomName).emit('gameState',
             {
                 status: 'success',
@@ -275,7 +285,7 @@ class Room{
                     _turn: this.gameState._turn,
                     currentTurn: this.gameState.currentTurn,
                     activeTurnSocketId: this.gameState.activeTurnSocket === null ? null : this.gameState.activeTurnSocket.id,
-                    activeWord: '',
+                    activeWord: hint,
                     canvasData: this.gameState.canvasData,
                     chatData: this.gameState.chatData,
                     userList: this.getActiveUsers()

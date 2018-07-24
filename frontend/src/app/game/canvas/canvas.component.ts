@@ -147,14 +147,14 @@ export class CanvasComponent implements OnInit, OnDestroy, AfterViewInit {
           takeUntil(fromEvent(canvasEl, 'touchend')),
           pairwise())
       }))
-      .subscribe((res: [MouseEvent, MouseEvent]) => {
+      .subscribe((res: [TouchEvent, TouchEvent]) => {
         //check if the user can draw in this turn
         if(this.socketService.socket.id !== this.activeTurnSocketId){
           return;
         }
         // previous and current position with the offset
-        const prevPos = this.getMousePos(res[0].clientX, res[0].clientY);
-        const currentPos = this.getMousePos(res[1].clientX, res[1].clientY);
+        const prevPos = this.getMousePos(res[0].touches[0].clientX, res[0].touches[0].clientY);
+        const currentPos = this.getMousePos(res[1].touches[0].clientX, res[1].touches[0].clientY);
 
         this.socketService.subjectXY.next({
           prevPos,
@@ -169,8 +169,8 @@ export class CanvasComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   private clearCanvas(){
-    this.cx.clearRect(0,0,this.canvasDiv.nativeElement.offsetWidth, this.canvasDiv.nativeElement.offsetHeight);
-    // this.cx.clearRect(0,0,this.canvas.nativeElement.width, this.canvas.nativeElement.height);
+    // this.cx.clearRect(0,0,this.canvasDiv.nativeElement.offsetWidth, this.canvasDiv.nativeElement.offsetHeight);
+    this.cx.clearRect(0,0,this.canvas.nativeElement.width, this.canvas.nativeElement.height);
   }
 
   private drawOnCanvas(prevPos: { x: number, y: number }, currentPos: { x: number, y: number }, color, size) {

@@ -49,9 +49,16 @@ export class SocketService {
       return () => {
         this.socket.disconnect();
       }
-    })
+    });
   }
 
+  connectToLatency(){
+    return new Observable( observer => {
+      this.socket.on('pong', (latency) => {
+        observer.next(latency);
+      });
+    });
+  }
 
   connectToChat(){
     return new Observable(observer => {
@@ -72,6 +79,15 @@ export class SocketService {
     });
   }
 
+  //gives a disconnect event even when the game ends
+  // listenDisconnect(){
+  //   this.socket.on('disconnect', ()=> {
+  //     this.gameState = null;
+  //     this.router.navigate(['/']);
+  //     alert('Connection with the server lost.');
+  //   });
+  // }
+
   connectRoom(type): Subject<MessageEvent> {
     if(!this.room || this.room == null || this.room == undefined){
       console.log('No room selected.');
@@ -79,7 +95,6 @@ export class SocketService {
     }
     this.gameState = null;
     this.socket = io(this.url);
-
 
     this.createGameStateObservable().pipe(
       first(),

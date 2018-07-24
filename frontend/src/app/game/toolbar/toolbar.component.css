@@ -1,4 +1,10 @@
 
+.tool-box{
+  background-color: white;
+  text-align: center;
+  width: 100%;
+}
+
 .color-picker{
   width: 1.5rem;
   height: 1.5rem;

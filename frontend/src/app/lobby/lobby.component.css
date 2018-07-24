@@ -1,0 +1,24 @@
+
+.outer{
+  width: 80%;
+  margin: auto;
+  text-align: center;
+}
+
+.inner{
+  width: 50%;
+  margin: 15% auto auto;
+}
+
+
+@media only screen and (max-width: 1100px) {
+  .inner{
+
+  }
+}
+
+@media only screen and (max-width: 840px) {
+  .inner{
+    width: 100%;
+  }
+}

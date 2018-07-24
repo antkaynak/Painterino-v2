@@ -24,9 +24,13 @@ export class WaitComponent implements OnInit, OnDestroy {
     if(this.socketService.gameState.game.status === 0){
       this.gameStateSubscription = this.socketService.createGameStateObservable().subscribe( (gameState:any) =>{
         this.socketService.gameState = gameState;
-        if(gameState.game.status === 1 && (this.socketService.socket !== null || this.socketService.socket !== undefined)){
+        if(gameState.game !== null && gameState.game.status === 1 && (this.socketService.socket !== null || this.socketService.socket !== undefined)){
             this.router.navigate(['/game']);
-        }else{
+        }else if(gameState.status === 'over'){
+          this.socketService.endGameScoreBoard = gameState.scoreBoard;
+          this.router.navigate(['/lobby/score']);
+        }
+        else{
           this.activeUserList = gameState.game.userList;
         }
       });
@@ -40,6 +44,10 @@ export class WaitComponent implements OnInit, OnDestroy {
     if(this.gameStateSubscription != null){
       this.gameStateSubscription.unsubscribe();
     }
+  }
+
+  back(){
+    this.router.navigate(['/lobby/rooms']);
   }
 
 }

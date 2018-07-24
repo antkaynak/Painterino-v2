@@ -5,7 +5,7 @@ import {
   MatButtonModule,
   MatCardModule,
   MatDialogModule,
-  MatFormFieldModule,
+  MatFormFieldModule, MatIconModule,
   MatInputModule,
   MatListModule,
   MatProgressBarModule, MatSelectModule,
@@ -31,7 +31,8 @@ const modules = [
   MatTableModule,
   MatProgressBarModule,
   MatSlideToggleModule,
-  MatSelectModule
+  MatSelectModule,
+  MatIconModule
 ];
 
 @NgModule({

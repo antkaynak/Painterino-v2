@@ -1,9 +1,17 @@
-<mat-list class="room-list" style="overflow-y: auto; height: 100%">
+<mat-list class="room-list" style="overflow-y: auto; height: 300px">
   <mat-list-item *ngFor="let user of activeUserList">
-    <mat-card>
-      <div class="room">
+    <mat-card class="user" style="margin-bottom: 10px">
+      <i class="material-icons" style="float: left">
+        verified_user
+      </i>
+      <p style="margin: 0; padding: 0">
         {{user.userName}}
-      </div>
+      </p>
     </mat-card>
   </mat-list-item>
 </mat-list>
+<button (click)="back()" mat-raised-button>
+  <i class="material-icons">
+  keyboard_arrow_left
+  </i>
+</button>

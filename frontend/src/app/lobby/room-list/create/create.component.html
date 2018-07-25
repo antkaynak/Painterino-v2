@@ -33,7 +33,7 @@
       </mat-form-field>
 
       <mat-form-field style="display: inline-block; width: 50%;">
-        <mat-select name="min" id="min" [formControlName]="'min'" placeholder="Min" >
+        <mat-select name="min" id="min" [formControlName]="'min'" placeholder="Min">
           <mat-option *ngFor="let number of [2,3,4,5,6,7,8,9,10]" value="{{number}}">
             {{number}}
           </mat-option>
@@ -41,7 +41,7 @@
       </mat-form-field>
 
       <mat-form-field style="display: inline-block; width: 50%;">
-        <mat-select name="max" id="max" [formControlName]="'max'" placeholder="Max" >
+        <mat-select name="max" id="max" [formControlName]="'max'" placeholder="Max">
           <mat-option *ngFor="let number of [2,3,4,5,6,7,8,9,10]" value="{{number}}">
             {{number}}
           </mat-option>

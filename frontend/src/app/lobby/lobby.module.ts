@@ -6,14 +6,14 @@ import {FlexLayoutModule} from "@angular/flex-layout";
 import {LobbyRoutes} from "./lobby.routes";
 import {LobbyComponent} from "./lobby.component";
 import {MaterialModule} from "../material.module";
-import { RoomListComponent } from './room-list/room-list.component';
+import {RoomListComponent} from './room-list/room-list.component';
 import {LoginComponent} from "./auth/login/login.component";
 import {RegisterComponent} from "./auth/register/register.component";
 import {ReactiveFormsModule} from "@angular/forms";
-import { CreateComponent } from './room-list/create/create.component';
-import { JoinComponent } from './room-list/join/join.component';
-import { WaitComponent } from './wait/wait.component';
-import { ScoreBoardComponent } from './score-board/score-board.component';
+import {CreateComponent} from './room-list/create/create.component';
+import {JoinComponent} from './room-list/join/join.component';
+import {WaitComponent} from './wait/wait.component';
+import {ScoreBoardComponent} from './score-board/score-board.component';
 
 
 @NgModule({
@@ -33,7 +33,7 @@ import { ScoreBoardComponent } from './score-board/score-board.component';
     JoinComponent,
     WaitComponent,
     ScoreBoardComponent
-  ],entryComponents: [
+  ], entryComponents: [
     CreateComponent,
     JoinComponent
   ],

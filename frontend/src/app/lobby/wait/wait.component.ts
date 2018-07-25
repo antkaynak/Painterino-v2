@@ -15,38 +15,38 @@ export class WaitComponent implements OnInit, OnDestroy {
   gameStateSubscription: Subscription;
 
 
-
-  constructor(private socketService : SocketService, private router: Router) { }
+  constructor(private socketService: SocketService, private router: Router) {
+  }
 
   ngOnInit() {
     this.activeUserList = this.socketService.gameState.game.userList;
 
-    if(this.socketService.gameState.game.status === 0){
-      this.gameStateSubscription = this.socketService.createGameStateObservable().subscribe( (gameState:any) =>{
+    if (this.socketService.gameState.game.status === 0) {
+      this.gameStateSubscription = this.socketService.createGameStateObservable().subscribe((gameState: any) => {
         this.socketService.gameState = gameState;
-        if(gameState.game !== null && gameState.game.status === 1 && (this.socketService.socket !== null || this.socketService.socket !== undefined)){
-            this.router.navigate(['/game']);
-        }else if(gameState.status === 'over'){
+        if (gameState.game !== null && gameState.game.status === 1 && (this.socketService.socket !== null || this.socketService.socket !== undefined)) {
+          this.router.navigate(['/game']);
+        } else if (gameState.status === 'over') {
           this.socketService.endGameScoreBoard = gameState.scoreBoard;
           this.router.navigate(['/lobby/score']);
         }
-        else{
+        else {
           this.activeUserList = gameState.game.userList;
         }
       });
-    }else if(this.socketService.gameState.game.status === 1){
+    } else if (this.socketService.gameState.game.status === 1) {
       this.router.navigate(['/game']);
     }
 
   }
 
   ngOnDestroy() {
-    if(this.gameStateSubscription != null){
+    if (this.gameStateSubscription != null) {
       this.gameStateSubscription.unsubscribe();
     }
   }
 
-  back(){
+  back() {
     this.router.navigate(['/lobby/rooms']);
   }
 

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {SocketService} from "../../services/socket.service";
 import {Router} from "@angular/router";
 
@@ -12,7 +12,8 @@ export class ScoreBoardComponent implements OnInit {
   displayedColumns: string[] = ['position', 'name', 'score'];
   dataSource = [];
 
-  constructor(private socketService: SocketService, private router: Router) { }
+  constructor(private socketService: SocketService, private router: Router) {
+  }
 
   ngOnInit() {
     this.dataSource = this.socketService.endGameScoreBoard;

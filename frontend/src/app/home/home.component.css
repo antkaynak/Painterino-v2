@@ -1,17 +1,17 @@
 
-h1{
+h1 {
   font-family: 'Kaushan Script', cursive;
   font-size: 8em;
   color: white;
   text-shadow: 2px 2px 8px #333333;
 }
 
-button{
+button {
   width: 50%;
 }
 
 @media only screen and (max-width: 840px) {
-  h1{
+  h1 {
     font-size: 2em;
   }
 }

@@ -10,10 +10,11 @@ import {Router} from "@angular/router";
 })
 export class GameComponent implements OnInit, OnDestroy {
 
-  constructor(private socketService: SocketService, private router: Router) { }
+  constructor(private socketService: SocketService, private router: Router) {
+  }
 
   ngOnInit() {
-    if(this.socketService.subjectXY === undefined || this.socketService.subjectXY === null){
+    if (this.socketService.subjectXY === undefined || this.socketService.subjectXY === null) {
       this.router.navigate(['/rooms']);
     }
   }

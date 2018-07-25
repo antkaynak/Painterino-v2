@@ -16,21 +16,21 @@ export class JoinComponent implements OnInit {
 
   constructor(private socketService: SocketService,
               public dialogRef: MatDialogRef<CreateComponent>,
-              @Inject(MAT_DIALOG_DATA) public data: any) { }
+              @Inject(MAT_DIALOG_DATA) public data: any) {
+  }
 
   ngOnInit() {
-    console.log(this.data);
     this.roomForm = new FormGroup({
-      'roomName': new FormControl(this.data.roomName,[Validators.required, BlankValidator.checkIfBlankValidator]),
-      'roomPassword': new FormControl(null,[BlankValidator.checkIfBlankValidator])
+      'roomName': new FormControl(this.data.roomName, [Validators.required, BlankValidator.checkIfBlankValidator]),
+      'roomPassword': new FormControl(null, [BlankValidator.checkIfBlankValidator])
     });
   }
 
-  cancel(){
+  cancel() {
     this.dialogRef.close();
   }
 
-  onSubmitted(){
+  onSubmitted() {
     const roomName = this.roomForm.controls.roomName.value;
     const roomPassword = this.roomForm.controls.roomPassword.value;
     this.socketService.selectRoom({roomName, roomPassword});

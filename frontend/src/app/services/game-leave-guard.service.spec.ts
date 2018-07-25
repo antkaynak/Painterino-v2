@@ -1,6 +1,6 @@
-import { TestBed, inject } from '@angular/core/testing';
+import {inject, TestBed} from '@angular/core/testing';
 
-import { GameLeaveGuardService } from './game-leave-guard.service';
+import {GameLeaveGuardService} from './game-leave-guard.service';
 
 describe('GameLeaveGuardService', () => {
   beforeEach(() => {

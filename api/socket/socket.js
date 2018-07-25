@@ -52,7 +52,7 @@ sockets.init = function (server) {
                 }
 
                 //If there are no slots for the player to join
-                if(room.userSockets.length >= room.maxPlayerCount){
+                if (room.userSockets.length >= room.maxPlayerCount) {
                     socket.emit('gameState', {
                         status: 'fail',
                         game: null,
@@ -73,10 +73,10 @@ sockets.init = function (server) {
 
                 //game logic to check if the game should start or not
                 if (room.gameState.status === 0) {
-                    if(room.gameStart()){
+                    if (room.gameStart()) {
                         room.sendGameStateToActiveSocket();
                         room.sendGameStateToOtherSockets();
-                    }else{
+                    } else {
                         room.sendGameStateToAllSockets();
                     }
 
@@ -109,7 +109,7 @@ sockets.init = function (server) {
             }
             const min = parseInt(params.room.min);
             const max = parseInt(params.room.max);
-            if(min < 2 || min > 10 || max < 2 || max > 10 || min > max){
+            if (min < 2 || min > 10 || max < 2 || max > 10 || min > max) {
                 console.log(params);
                 socket.emit('gameState', {
                     status: 'fail',
@@ -185,12 +185,12 @@ sockets.init = function (server) {
             if (room === undefined || room === null) {
                 return;
             }
-            if(room.gameState.status === 0){
-                if(room.userSockets.length <= 1){
+            if (room.gameState.status === 0) {
+                if (room.userSockets.length <= 1) {
                     room.gameFailedOver();
                     socket.leave(socket['roomName']);
                     return;
-                }else{
+                } else {
                     room.removeUser(socket);
                     socket.leave(socket['roomName']);
                     room.sendGameStateToAllSockets();

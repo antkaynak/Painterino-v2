@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import {Injectable} from '@angular/core';
 import {HttpClient, HttpHeaders} from "@angular/common/http";
 import {catchError, map, tap} from "rxjs/operators";
 import {throwError} from "rxjs/internal/observable/throwError";
@@ -11,60 +11,68 @@ export class AuthService {
   private url: string = 'http://localhost:3000/api';
   private user = {};
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) {
+  }
 
-  logIn(email, password){
+  logIn(email, password) {
     const body = {
       email,
       password
     };
-    return this.http.post(this.url+'/users/login', body,{
+    return this.http.post(this.url + '/users/login', body, {
       observe: 'response',
       headers: new HttpHeaders().set('Content-Type', 'application/json')
-    }).pipe(map(res=>{
-      console.log(res);
+    }).pipe(map(res => {
       this.setSession(res);
       return res;
-    }), catchError(error=>{
-      console.log(error);
+    }), catchError(error => {
       this.removeSession();
       return throwError(error);
     }));
   }
 
-  register(email,username,password, passwordConfirm){
+  register(email, username, password, passwordConfirm) {
     const body = {
       email,
       username,
       password,
       passwordConfirm
     };
-    return this.http.post(this.url+'/users',body,{
+    return this.http.post(this.url + '/users', body, {
       observe: 'response',
       headers: new HttpHeaders().set('Content-Type', 'application/json')
-    }).pipe(map(res=>{
-      console.log(res);
+    }).pipe(map(res => {
       this.setSession(res);
       return res;
-    }),catchError(error=>{
-      console.log(error);
+    }), catchError(error => {
       this.removeSession();
       return throwError(error);
     }));
   }
 
-  checkJWT(){
+  checkJWT() {
     return localStorage.getItem("id_token") != null;
   }
 
-  getUser(){
-    return this.http.get(this.url+'/users/me').pipe(tap(res=>{
+  getUser() {
+    return this.http.get(this.url + '/users/me').pipe(tap(res => {
       this.user = res;
       this.authenticated = true;
-    }),catchError(error => {
+    }), catchError(error => {
       this.removeSession();
       return throwError(error);
     }));
+  }
+
+  logOut() {
+    return this.http.delete(this.url + "/users/me/token")
+      .pipe(catchError(error => {
+        console.log(error);
+        this.removeSession();
+        return throwError(error);
+      }), map(res => {
+        this.removeSession();
+      }));
   }
 
   private setSession(authResult) {
@@ -76,19 +84,8 @@ export class AuthService {
     this.authenticated = true;
   }
 
-  private removeSession(){
+  private removeSession() {
     localStorage.clear();
     this.authenticated = false;
-  }
-
-  logOut(){
-    return this.http.delete(this.url+"/users/me/token")
-      .pipe(catchError(error => {
-        console.log(error);
-        this.removeSession();
-        return throwError(error);
-      }), map(res => {
-        this.removeSession();
-      }));
   }
 }

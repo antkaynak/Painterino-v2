@@ -2,7 +2,9 @@
   <div *ngFor="let user of userList; let i = index">
     <mat-card style="margin-bottom: 10px">
       <p style="padding: 0;margin: 0;font-size: 1.25em; display: inline-block">{{user.userName}}</p>
-      <p style="padding: 0;margin:0; margin-left: auto !important; display: inline-block; font-size: 1.25em; float:right">{{user.score}}</p>
+      <p
+        style="padding: 0;margin:0; margin-left: auto !important; display: inline-block; font-size: 1.25em; float:right">
+        {{user.score}}</p>
       <i *ngIf="_turn === i" class="material-icons" style="padding-left: 2px; float: right">edit</i>
     </mat-card>
   </div>

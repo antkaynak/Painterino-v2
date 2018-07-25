@@ -1,77 +1,78 @@
+<form [formGroup]="registerForm" (ngSubmit)="onSubmitted()">
+  <div class="form-group">
+    <mat-form-field>
+      <input type="text"
+             id="email"
+             class="form-control"
+             name="email"
+             placeholder="Email"
+             formControlName="email"
+             [maxlength]="240"
+             matInput
+      >
 
-      <form [formGroup]="registerForm" (ngSubmit)="onSubmitted()">
-        <div class="form-group">
-          <mat-form-field>
-            <input type="text"
-                   id="email"
-                   class="form-control"
-                   name="email"
-                   placeholder="Email"
-                   formControlName="email"
-                   [maxlength]="240"
-                   matInput
-            >
+    </mat-form-field>
+  </div>
 
-          </mat-form-field>
-        </div>
+  <div class="form-group">
+    <mat-form-field>
+      <input type="text"
+             id="username"
+             class="form-control"
+             name="username"
+             placeholder="Username"
+             formControlName="username"
+             [maxlength]="16"
+             matInput
+      >
+    </mat-form-field>
+  </div>
 
-        <div class="form-group">
-          <mat-form-field>
-            <input type="text"
-                   id="username"
-                   class="form-control"
-                   name="username"
-                   placeholder="Username"
-                   formControlName="username"
-                   [maxlength]="16"
-                   matInput
-            >
-          </mat-form-field>
-        </div>
+  <div formGroupName="passwordGroup">
+    <div class="form-group">
 
-        <div formGroupName="passwordGroup">
-          <div class="form-group">
+      <mat-form-field>
+        <input type="password"
+               id="password"
+               class="form-control"
+               name="password"
+               placeholder="Password"
+               formControlName="password"
+               [maxlength]="240"
+               matInput
+        >
+      </mat-form-field>
 
-            <mat-form-field>
-            <input type="password"
-                   id="password"
-                   class="form-control"
-                   name="password"
-                   placeholder="Password"
-                   formControlName="password"
-                   [maxlength]="240"
-                   matInput
-            >
-            </mat-form-field>
+    </div>
+    <div class="form-group">
+      <mat-form-field>
+        <input type="password"
+               id="passwordConfirm"
+               class="form-control"
+               name="passwordConfirm"
+               placeholder="Password Repeat"
+               formControlName="passwordConfirm"
+               [maxlength]="240"
+               matInput
+        >
+      </mat-form-field>
 
-          </div>
-          <div class="form-group">
-            <mat-form-field>
-            <input type="password"
-                   id="passwordConfirm"
-                   class="form-control"
-                   name="passwordConfirm"
-                   placeholder="Password Repeat"
-                   formControlName="passwordConfirm"
-                   [maxlength]="240"
-                   matInput
-            >
-            </mat-form-field>
-
-        </div>
-        </div>
-
-
-        <div class="form-group">
-          <mat-list >
-            <mat-list-item ><a routerLink="/login" style="color:gray; font-size: 0.80em; margin: auto">Already have an account? Login!</a></mat-list-item>
-            <mat-list-item><button mat-raised-button style="margin: auto" type="submit" [disabled]="registerForm.invalid || registerForm.pending">Register</button>
-            </mat-list-item>
-          </mat-list>
-        </div>
+    </div>
+  </div>
 
 
+  <div class="form-group">
+    <mat-list>
+      <mat-list-item><a routerLink="/login" style="color:gray; font-size: 0.80em; margin: auto">Already have an account?
+        Login!</a></mat-list-item>
+      <mat-list-item>
+        <button mat-raised-button style="margin: auto" type="submit"
+                [disabled]="registerForm.invalid || registerForm.pending">Register
+        </button>
+      </mat-list-item>
+    </mat-list>
+  </div>
 
 
-      </form>
+</form>
 

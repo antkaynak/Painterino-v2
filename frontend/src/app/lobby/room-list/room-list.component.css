@@ -1,26 +1,27 @@
 
-.room-list{
+.room-list {
   height: 300px;
 }
 
-.right-panel{
-  border-left: 1px solid rgba(0,0,0,.30);
+.right-panel {
+  border-left: 1px solid rgba(0, 0, 0, .30);
 }
 
-button{
+button {
   width: 100%;
 }
 
-mat-card{
+mat-card {
   cursor: pointer;
 }
 
 @media only screen and (max-width: 599px) {
-  .room-list{
+  .room-list {
     height: 600px;
   }
-  .right-panel{
+
+  .right-panel {
     border-left: 0;
-    border-top: 1px solid rgba(0,0,0,.30);
+    border-top: 1px solid rgba(0, 0, 0, .30);
   }
 }

@@ -1,10 +1,9 @@
-import {AfterViewInit, Component, ElementRef, HostListener, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild} from '@angular/core';
 
 import {pairwise, switchMap, takeUntil} from 'rxjs/operators';
 import {fromEvent} from "rxjs/internal/observable/fromEvent";
 import {SocketService} from "../../services/socket.service";
 import {Subscription} from "rxjs/internal/Subscription";
-
 
 
 @Component({
@@ -19,7 +18,10 @@ export class CanvasComponent implements OnInit, OnDestroy, AfterViewInit {
 
   canvasData = [];
   activeTurnSocketId;
-
+  // a reference to the canvas element from our template
+  @ViewChild('canvas') public canvas: ElementRef;
+  @ViewChild('canvasDiv') public canvasDiv: ElementRef;
+  private cx: CanvasRenderingContext2D;
 
   constructor(private socketService: SocketService) {
   }
@@ -29,19 +31,19 @@ export class CanvasComponent implements OnInit, OnDestroy, AfterViewInit {
 
     this.activeTurnSocketId = this.socketService.gameState.game.activeTurnSocketId;
 
-    this.gameStateSubscription = this.socketService.createGameStateObservable().subscribe((gameState:any) => {
-      if(gameState.status === 'over'){
+    this.gameStateSubscription = this.socketService.createGameStateObservable().subscribe((gameState: any) => {
+      if (gameState.status === 'over') {
         return;
       }
       this.activeTurnSocketId = gameState.game.activeTurnSocketId;
 
-      if(gameState.game.canvasData.length < 1){
+      if (gameState.game.canvasData.length < 1) {
         this.canvasData = [];
         this.clearCanvas();
       }
     });
 
-    if(this.socketService.subjectXY !== undefined || this.socketService.subjectXY !== null){
+    if (this.socketService.subjectXY !== undefined || this.socketService.subjectXY !== null) {
       this.socketXYSubscription = this.socketService.subjectXY.subscribe(xy => {
         xy = JSON.parse(xy);
         this.drawOnCanvas(xy.prevPos, xy.currentPos, xy.color, xy.size);
@@ -49,35 +51,28 @@ export class CanvasComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
-
   ngOnDestroy() {
-    if(this.socketXYSubscription != null){
+    if (this.socketXYSubscription != null) {
       this.socketXYSubscription.unsubscribe();
     }
-    if(this.gameStateSubscription != null){
+    if (this.gameStateSubscription != null) {
       this.gameStateSubscription.unsubscribe();
     }
   }
 
-  // a reference to the canvas element from our template
-  @ViewChild('canvas') public canvas: ElementRef;
-  @ViewChild('canvasDiv') public canvasDiv: ElementRef;
-
   @HostListener('window:resize', ['$event'])
   sizeChange(event) {
-    this.canvas.nativeElement.style.width = this.canvasDiv.nativeElement.offsetWidth+'px';
-    this.canvas.nativeElement.style.height = this.canvasDiv.nativeElement.offsetHeight+'px';
+    this.canvas.nativeElement.style.width = this.canvasDiv.nativeElement.offsetWidth + 'px';
+    this.canvas.nativeElement.style.height = this.canvasDiv.nativeElement.offsetHeight + 'px';
   }
-
-  private cx: CanvasRenderingContext2D;
 
   public ngAfterViewInit() {
     // get the context
     const canvasEl: HTMLCanvasElement = this.canvas.nativeElement;
     this.cx = canvasEl.getContext('2d');
     // set the width and height
-    this.canvas.nativeElement.style.width = this.canvasDiv.nativeElement.offsetWidth+'px';
-    this.canvas.nativeElement.style.height = this.canvasDiv.nativeElement.offsetHeight+'px';
+    this.canvas.nativeElement.style.width = this.canvasDiv.nativeElement.offsetWidth + 'px';
+    this.canvas.nativeElement.style.height = this.canvasDiv.nativeElement.offsetHeight + 'px';
 
     // set some default properties about the line
     this.cx.lineWidth = this.socketService.toolBar.size;
@@ -86,14 +81,14 @@ export class CanvasComponent implements OnInit, OnDestroy, AfterViewInit {
 
     this.captureEvents(canvasEl);
 
-    for(let i = 0; i < this.canvasData.length; i++){
+    for (let i = 0; i < this.canvasData.length; i++) {
       let toDraw = JSON.parse(this.canvasData[i]);
       this.drawOnCanvas(toDraw.prevPos, toDraw.currentPos, toDraw.color, toDraw.size);
     }
   }
 
 
-    getMousePos(clientX, clientY) {
+  getMousePos(clientX, clientY) {
 
     const rect = this.canvas.nativeElement.getBoundingClientRect();
     let X = (clientX - rect.left) / (this.canvas.nativeElement.clientWidth / this.canvas.nativeElement.width);
@@ -109,10 +104,10 @@ export class CanvasComponent implements OnInit, OnDestroy, AfterViewInit {
 
   private captureEvents(canvasEl: HTMLCanvasElement) {
     // this will capture all mousedown events from the canvas element
-      fromEvent(canvasEl, 'mousedown').pipe(
+    fromEvent(canvasEl, 'mousedown').pipe(
       switchMap((e) => {
         // after a mouse down, we'll record all mouse moves
-          return fromEvent(canvasEl, 'mousemove').pipe(
+        return fromEvent(canvasEl, 'mousemove').pipe(
           // we'll stop (and unsubscribe) once the user releases the mouse
           // this will trigger a 'mouseup' event
           takeUntil(fromEvent(canvasEl, 'mouseup')),
@@ -124,7 +119,7 @@ export class CanvasComponent implements OnInit, OnDestroy, AfterViewInit {
       }))
       .subscribe((res: [MouseEvent, MouseEvent]) => {
         //check if the user can draw in this turn
-        if(this.socketService.socket.id !== this.activeTurnSocketId){
+        if (this.socketService.socket.id !== this.activeTurnSocketId) {
           return;
         }
 
@@ -149,7 +144,7 @@ export class CanvasComponent implements OnInit, OnDestroy, AfterViewInit {
       }))
       .subscribe((res: [TouchEvent, TouchEvent]) => {
         //check if the user can draw in this turn
-        if(this.socketService.socket.id !== this.activeTurnSocketId){
+        if (this.socketService.socket.id !== this.activeTurnSocketId) {
           return;
         }
         // previous and current position with the offset
@@ -168,14 +163,16 @@ export class CanvasComponent implements OnInit, OnDestroy, AfterViewInit {
 
   }
 
-  private clearCanvas(){
+  private clearCanvas() {
     // this.cx.clearRect(0,0,this.canvasDiv.nativeElement.offsetWidth, this.canvasDiv.nativeElement.offsetHeight);
-    this.cx.clearRect(0,0,this.canvas.nativeElement.width, this.canvas.nativeElement.height);
+    this.cx.clearRect(0, 0, this.canvas.nativeElement.width, this.canvas.nativeElement.height);
   }
 
   private drawOnCanvas(prevPos: { x: number, y: number }, currentPos: { x: number, y: number }, color, size) {
     // in case the context is not set
-    if (!this.cx) { return; }
+    if (!this.cx) {
+      return;
+    }
 
     // start our drawing path
     this.cx.beginPath();

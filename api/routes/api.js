@@ -9,8 +9,8 @@ const {authenticate} = require('../middleware/auth');
 
 // POST /users
 router.post('/users', (req, res) => {
-    const body = _.pick(req.body, ['email', 'username','password', 'passwordConfirm']);
-    if(body.password !== body.passwordConfirm){
+    const body = _.pick(req.body, ['email', 'username', 'password', 'passwordConfirm']);
+    if (body.password !== body.passwordConfirm) {
         return res.status(400).send('Passwords do not match.');
     }
     const user = new User(body);
@@ -20,10 +20,12 @@ router.post('/users', (req, res) => {
     }).then((token) => {
         res.set({
             "x-auth": token,
-            "Access-Control-Expose-Headers":"x-auth"
+            "Access-Control-Expose-Headers": "x-auth"
         }).send(user);
     }).catch((e) => {
-        res.status(400).send(e);
+        res.status(400).send({
+            message: 'Internal server error. Please contact our support team.'
+        });
     })
 });
 
@@ -41,12 +43,13 @@ router.post('/users/login', (req, res) => {
             //have to set expose headers so angular can pick it up
             res.set({
                 "x-auth": token,
-                "Access-Control-Expose-Headers":"x-auth"
+                "Access-Control-Expose-Headers": "x-auth"
             }).send(user);
-            // res.header('x-auth', token).send(user);
         });
     }).catch((e) => {
-        res.status(400).send();
+        res.status(400).send({
+            message: 'Invalid email or password.'
+        });
     });
 });
 

@@ -1,6 +1,7 @@
 <div fxLayout="column" style="background-color: #323232; height: 100%;">
   <div fxFlex="90%" fxFlex.xs="60%">
-    <mat-list #chatList [scrollTop]="chatList.scrollHeight" style="height: 85%; overflow-x: hidden; overflow-y: auto; -ms-word-break: break-all;word-break: break-all;: break-word; white-space: pre-line">
+    <mat-list #chatList [scrollTop]="chatList.scrollHeight"
+              style="height: 85%; overflow-x: hidden; overflow-y: auto; -ms-word-break: break-all;word-break: break-all;: break-word; white-space: pre-line">
       <mat-list-item *ngFor="let message of chatData" style="color:white">
         {{message}}
       </mat-list-item>
@@ -9,7 +10,9 @@
   <div fxFlex="10%" fxFlex.xs="40%">
     <div style="width: 100%;">
       <mat-form-field style="width: 90%">
-        <input matInput #chat id="chat" type="text" (keyup.enter)="sendMessage(chat)" style="color:white">
+        <input matInput #chat id="chat" type="text" (keyup.enter)="sendMessage(chat)" style="color:white"
+              >
+        <mat-placeholder class="placeholder" style="color: white">Type here!</mat-placeholder>
       </mat-form-field>
       <i (click)="sendMessage(chat)" class="material-icons" style="color: white; width: 10%; cursor: pointer">send</i>
     </div>

@@ -1,16 +1,15 @@
-import { Injectable } from '@angular/core';
-import { Observable, Subject, timer } from 'rxjs';
+import {Injectable} from '@angular/core';
+import {Observable, Subject, timer} from 'rxjs';
 import * as io from 'socket.io-client';
 import {HttpClient} from "@angular/common/http";
 import {first, flatMap, map, tap} from "rxjs/operators";
 import {Router} from "@angular/router";
-import {Subscription} from "rxjs/internal/Subscription";
 
 export interface ChatMessage {
-  message:{
+  message: {
     text: string,
     createdAt: any,
-    userName : string
+    userName: string
   }
 }
 
@@ -27,22 +26,23 @@ export class SocketService {
   socket;
 
   private url = 'http://localhost:3000';
-  private room: { roomName: null, roomPassword: null, min: 2, max: 2 };
+  private room: { roomName: null, roomPassword: null, min: 2, max: 10 };
 
-  constructor(private http: HttpClient, private router: Router) { }
+  constructor(private http: HttpClient, private router: Router) {
+  }
 
-  selectRoom(room){
+  selectRoom(room) {
     this.room = room;
   }
 
 
-  getActiveRooms(){
+  getActiveRooms() {
     return timer(0, 10000)
-      .pipe(flatMap(() => this.http.get(this.url+'/lobby/rooms')));
+      .pipe(flatMap(() => this.http.get(this.url + '/lobby/rooms')));
   }
 
-  connectToTimer(){
-    return new Observable( observer => {
+  connectToTimer() {
+    return new Observable(observer => {
       this.socket.on('timer', (data) => {
         observer.next(data);
       });
@@ -52,17 +52,17 @@ export class SocketService {
     });
   }
 
-  connectToLatency(){
-    return new Observable( observer => {
+  connectToLatency() {
+    return new Observable(observer => {
       this.socket.on('pong', (latency) => {
         observer.next(latency);
       });
     });
   }
 
-  connectToChat(){
+  connectToChat() {
     return new Observable(observer => {
-      this.socket.on('receiveMessage', (data)=>{
+      this.socket.on('receiveMessage', (data) => {
         observer.next(JSON.parse(data.message));
       });
       return () => {
@@ -71,9 +71,9 @@ export class SocketService {
     });
   }
 
-  sendToChat(data){
-    return this.socket.emit('createMessage', JSON.stringify(data), function (error){
-      if(error){
+  sendToChat(data) {
+    return this.socket.emit('createMessage', JSON.stringify(data), function (error) {
+      if (error) {
         alert('An error occurred sending message to the chat.');
       }
     });
@@ -89,7 +89,7 @@ export class SocketService {
   // }
 
   connectRoom(type): Subject<MessageEvent> {
-    if(!this.room || this.room == null || this.room == undefined){
+    if (!this.room || this.room == null || this.room == undefined) {
       console.log('No room selected.');
       return;
     }
@@ -98,9 +98,9 @@ export class SocketService {
 
     this.createGameStateObservable().pipe(
       first(),
-      tap((gameState:any)=> {
+      tap((gameState: any) => {
         this.gameState = gameState;
-        if(gameState.status === 'success'){
+        if (gameState.status === 'success') {
           // We define our observable which will observe any incoming messages
           // from our socket.io server.
           let observable = new Observable(observer => {
@@ -123,35 +123,35 @@ export class SocketService {
 
           // we return our Rx.Subject which is a combination
           // of both an observer and observable.
-          this.subjectXY =  Subject.create(observer, observable).pipe(map((response: any): any => {
+          this.subjectXY = Subject.create(observer, observable).pipe(map((response: any): any => {
             return response;
           }));
 
-          if(this.gameState.game.status === 1){
+          if (this.gameState.game.status === 1) {
             this.router.navigate(['/game']);
-          }else{
+          } else {
 
             this.router.navigate(['/lobby/wait']);
           }
 
-        }else if(gameState.status === 'fail'){
+        } else if (gameState.status === 'fail') {
           alert(gameState.errorMessage);
         }
       })).subscribe();
 
-    if(type === 'create'){
-      this.socket.emit('create', { room:this.room, token: localStorage.getItem("id_token")});
-    }else if(type === 'join'){
-      this.socket.emit('join', { room:this.room, token: localStorage.getItem("id_token")});
-    }else{
+    if (type === 'create') {
+      this.socket.emit('create', {room: this.room, token: localStorage.getItem("id_token")});
+    } else if (type === 'join') {
+      this.socket.emit('join', {room: this.room, token: localStorage.getItem("id_token")});
+    } else {
       alert('error');
     }
 
   }
 
 
-  createGameStateObservable(){
-    return new Observable( observer => {
+  createGameStateObservable() {
+    return new Observable(observer => {
       this.socket.on('gameState', (gameState) => {
         observer.next(gameState);
       })

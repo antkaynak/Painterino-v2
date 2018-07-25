@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {MatDialogRef} from "@angular/material";
 import {CreateComponent} from "../../lobby/room-list/create/create.component";
 
@@ -9,13 +9,14 @@ import {CreateComponent} from "../../lobby/room-list/create/create.component";
 })
 export class AboutComponent implements OnInit {
 
-  constructor(public dialogRef: MatDialogRef<CreateComponent>) { }
+  constructor(public dialogRef: MatDialogRef<CreateComponent>) {
+  }
 
   ngOnInit() {
   }
 
 
-  cancel(){
+  cancel() {
     this.dialogRef.close();
   }
 

@@ -4,7 +4,7 @@ import {RouterModule} from "@angular/router";
 import {MaterialModule} from "../material.module";
 import {HomeRoutes} from "./home.routes";
 import {HomeComponent} from "./home.component";
-import { AboutComponent } from './about/about.component';
+import {AboutComponent} from './about/about.component';
 
 @NgModule({
   imports: [
@@ -15,7 +15,7 @@ import { AboutComponent } from './about/about.component';
   declarations: [
     HomeComponent,
     AboutComponent
-  ],entryComponents: [
+  ], entryComponents: [
     AboutComponent
   ],
 })

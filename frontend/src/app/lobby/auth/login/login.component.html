@@ -1,48 +1,48 @@
+<form [formGroup]="logInForm" (ngSubmit)="onSubmitted()">
+  <div class="form-group">
+    <mat-form-field>
+      <input type="text"
+             id="email"
+             class="form-control"
+             name="email"
+             placeholder="Email"
+             formControlName="email"
+             [maxlength]="240"
+             matInput
+      >
+
+    </mat-form-field>
+  </div>
+
+  <div class="form-group">
+    <mat-form-field>
+      <input type="password"
+             id="password"
+             class="form-control"
+             name="password"
+             placeholder="Password"
+             formControlName="password"
+             [maxlength]="240"
+             matInput
+      >
+    </mat-form-field>
+  </div>
 
 
-        <form [formGroup]="logInForm" (ngSubmit)="onSubmitted()">
-          <div class="form-group">
-            <mat-form-field>
-            <input type="text"
-                   id="email"
-                   class="form-control"
-                   name="email"
-                   placeholder="Email"
-                   formControlName="email"
-                   [maxlength]="240"
-                   matInput
-            >
-
-              </mat-form-field>
-          </div>
-
-          <div class="form-group">
-            <mat-form-field>
-            <input type="password"
-                   id="password"
-                   class="form-control"
-                   name="password"
-                   placeholder="Password"
-                   formControlName="password"
-                   [maxlength]="240"
-                   matInput
-            >
-              </mat-form-field>
-          </div>
+  <div class="form-group">
+    <mat-list>
+      <mat-list-item><a routerLink="/register" style="color:gray; font-size: 0.80em; margin: auto">Don't have an
+        account? Register now!</a></mat-list-item>
+      <mat-list-item><a style="color:gray; font-size: 0.75em; margin: auto">I forgot my password.</a></mat-list-item>
+      <mat-list-item>
+        <button mat-raised-button style="margin: auto" type="submit"
+                [disabled]="logInForm.invalid || logInForm.pending">Login
+        </button>
+      </mat-list-item>
+    </mat-list>
+  </div>
 
 
-          <div class="form-group">
-            <mat-list >
-              <mat-list-item ><a routerLink="/register" style="color:gray; font-size: 0.80em; margin: auto">Don't have an account? Register now!</a></mat-list-item>
-              <mat-list-item><a style="color:gray; font-size: 0.75em; margin: auto">I forgot my password.</a></mat-list-item>
-              <mat-list-item><button mat-raised-button style="margin: auto" type="submit" [disabled]="logInForm.invalid || logInForm.pending">Login</button>
-              </mat-list-item>
-            </mat-list>
-          </div>
-
-
-
-
-        </form>
+</form>
 
 

@@ -5,16 +5,17 @@ import {
   MatButtonModule,
   MatCardModule,
   MatDialogModule,
-  MatFormFieldModule, MatIconModule,
+  MatFormFieldModule,
+  MatIconModule,
   MatInputModule,
   MatListModule,
-  MatProgressBarModule, MatSelectModule,
+  MatProgressBarModule,
+  MatSelectModule,
   MatSliderModule,
   MatSlideToggleModule,
   MatTableModule,
   MatToolbarModule
 } from "@angular/material";
-
 
 
 const modules = [
@@ -37,14 +38,12 @@ const modules = [
 
 @NgModule({
   imports: [
-   modules
-  ],
-  exports:[
     modules
   ],
-  declarations: [
-
-  ]
+  exports: [
+    modules
+  ],
+  declarations: []
 })
 export class MaterialModule {
 }

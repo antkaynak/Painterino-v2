@@ -1,21 +1,25 @@
 <mat-progress-bar mode="determinate" [value]="100 - (timerValue * 1.65)" aria-label="progress"></mat-progress-bar>
 <div class="tool-box" fxLayout="row" fxLayoutWrap fxLayoutGap="0.5%" fxLayoutAlign="center">
-    <div fxFlex="20%">
-      <label id="color-picker-wrapper"><input
-        class="color-picker"
-        [cpDisableInput]="true"
-        [(colorPicker)]="initColor"
-        (colorPickerChange)="onChangeColorHex8($event)"
-        [cpPosition]="'top'" [style.background]="initColor"
-        [readonly]="true"
-      /></label>
-    </div>
-  <div fxFlex="20%"><mat-slider thumbLabel min="1" max="48" step="2" value="3" (input)="onChangeSize($event)"></mat-slider></div>
-    <div fxFlex="40%">
-      <p style="font-size: 1.75em; font-family: 'Roboto',serif; margin: 0; padding: 0; display: inline-block;" *ngIf="activeWord !== undefined">{{activeWord}}</p>
-      <p style="padding: 0 0 0 5px; margin: 0; font-size: 1.25em; display: inline-block;">{{timerValue}}</p>
-      <p style="padding: 0 0 0 5px; margin: 0; font-size: 1em; display: inline-block;" *ngIf="latency !== 0" [style.color]="latency > 20 ? 'red' : 'green'">{{latency}} ms</p>
-    </div>
+  <div fxFlex="20%">
+    <label id="color-picker-wrapper"><input
+      class="color-picker"
+      [cpDisableInput]="true"
+      [(colorPicker)]="initColor"
+      (colorPickerChange)="onChangeColorHex8($event)"
+      [cpPosition]="'top'" [style.background]="initColor"
+      [readonly]="true"
+    /></label>
+  </div>
+  <div fxFlex="20%">
+    <mat-slider thumbLabel min="1" max="48" step="2" value="3" (input)="onChangeSize($event)"></mat-slider>
+  </div>
+  <div fxFlex="40%">
+    <p style="font-size: 1.75em; margin: 0; padding: 0; display: inline-block;"
+       *ngIf="activeWord !== undefined">{{activeWord}}</p>
+    <p style="padding: 0 0 0 5px; margin: 0; font-size: 1.25em; display: inline-block;">{{timerValue}}</p>
+    <p style="padding: 0 0 0 5px; margin: 0; font-size: 1em; display: inline-block;" *ngIf="latency !== 0"
+       [style.color]="latency > 100 ? 'red' : 'green'">{{latency}} ms</p>
+  </div>
 
 
 </div>

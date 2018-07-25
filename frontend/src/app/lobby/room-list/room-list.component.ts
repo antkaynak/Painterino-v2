@@ -20,19 +20,20 @@ export class RoomListComponent implements OnInit, OnDestroy {
   isRefreshActive: boolean = false;
 
   constructor(private socketService: SocketService, private authService: AuthService,
-              private router: Router, public dialog: MatDialog) { }
+              private router: Router, public dialog: MatDialog) {
+  }
 
 
   ngOnInit() {
     this.activeRoomsSubscription = this.socketService.getActiveRooms()
-      .subscribe(data=>{
+      .subscribe(data => {
         this.activeRooms = data;
         this.isRefreshActive = true;
       });
   }
 
   ngOnDestroy() {
-    if(this.activeRoomsSubscription != null){
+    if (this.activeRoomsSubscription != null) {
       this.activeRoomsSubscription.unsubscribe();
     }
   }
@@ -52,8 +53,8 @@ export class RoomListComponent implements OnInit, OnDestroy {
     });
   }
 
-  logOut(){
-    this.authService.logOut().subscribe( () =>{
+  logOut() {
+    this.authService.logOut().subscribe(() => {
       this.router.navigate(['/lobby/login']);
     })
   }
@@ -61,9 +62,9 @@ export class RoomListComponent implements OnInit, OnDestroy {
   refreshList() {
     this.isRefreshActive = false;
     this.socketService.getActiveRooms()
-      .pipe(first(), tap( data => {
-        this.activeRooms = data;
-        this.isRefreshActive = true;
+      .pipe(first(), tap(data => {
+          this.activeRooms = data;
+          this.isRefreshActive = true;
         })
       )
       .subscribe();

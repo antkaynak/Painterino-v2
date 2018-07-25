@@ -1,24 +1,19 @@
 const moment = require('moment');
 
 
-//TODO active turn calculation is wrong fix it...
+class Room {
 
-//TODO one account should only be active in one room
-
-
-class Room{
-
-    constructor(io, roomName, roomPassword, minPlayerCount, maxPlayerCount){
+    constructor(io, roomName, roomPassword, minPlayerCount, maxPlayerCount) {
         //setting room configs
         this.io = io;
         this.roomName = roomName;
         this.roomPassword = roomPassword;
         this.userSockets = [];
-        this.randomWords= [];
+        this.randomWords = [];
         this.correctGuessSockets = [];
 
         //Room limits
-        this.randomWordCount= 10;
+        this.randomWordCount = 10;
         this.minPlayerCount = minPlayerCount;
         this.maxPlayerCount = maxPlayerCount;
 
@@ -39,7 +34,7 @@ class Room{
         };
     }
 
-    gameStart(){
+    gameStart() {
         if (this.userSockets.length >= this.minPlayerCount) {
             //the first random word in the room
             //randomWords array got words while creating the room
@@ -58,17 +53,17 @@ class Room{
             this.activeTimerCount = this.timerMaxLimit;
 
             //starting the timer
-            this.timerInterval = setInterval(this.timerTick.bind(this),1000);
+            this.timerInterval = setInterval(this.timerTick.bind(this), 1000);
 
             //returning true so that would mean start the game
             return true;
         } else {
             //return false because there are not enough players
-           return false;
+            return false;
         }
     }
 
-    timerTick(){
+    timerTick() {
         //decrease time on every interval
         this.activeTimerCount--;
         if (this.activeTimerCount === 0) {
@@ -81,21 +76,21 @@ class Room{
         });
     }
 
-    timerOver(){
+    timerOver() {
         //if there are a next turn available
-        if(this.nextTurn(false)){
+        if (this.nextTurn(false)) {
             this.sendGameStateToActiveSocket();
             this.sendGameStateToOtherSockets(this.roomName);
-        }else{
+        } else {
             //it was the last round so end the game
             this.gameOver();
-            if(this.timerInterval !== null){
+            if (this.timerInterval !== null) {
                 clearInterval(this.timerInterval);
             }
         }
     }
 
-    gameOver(){
+    gameOver() {
 
         //create a scoreboard
         let scoreBoard = [];
@@ -108,12 +103,12 @@ class Room{
         }
 
         scoreBoard.sort(function (a, b) {
-           return b.score - a.score;
+            return b.score - a.score;
         });
 
         for (let i = 0; i < this.userSockets.length; i++) {
             //plus 1 because we want to start from 1 not index 0
-            scoreBoard[i].position = (i+1);
+            scoreBoard[i].position = (i + 1);
         }
 
         //send game over event
@@ -124,14 +119,14 @@ class Room{
                 scoreBoard: scoreBoard
             });
 
-        if(this.timerInterval !== null){
+        if (this.timerInterval !== null) {
             clearInterval(this.timerInterval);
         }
 
         activeRoomList.removeRoom(this.roomName);
     }
 
-    gameFailedOver(){
+    gameFailedOver() {
         let scoreBoard = [{position: '', score: '', userName: 'Everyone left the game!'}];
 
         //send game over event
@@ -141,13 +136,13 @@ class Room{
                 game: null,
                 scoreBoard: scoreBoard
             });
-        if(this.timerInterval !== null){
+        if (this.timerInterval !== null) {
             clearInterval(this.timerInterval);
         }
         activeRoomList.removeRoom(this.roomName);
     }
 
-    checkIfGuessed(userSocket, message){
+    checkIfGuessed(userSocket, message) {
         const text = JSON.parse(message).message.text.trim().toLowerCase();
         if (this.gameState.activeWord.trim().toLowerCase() === text
             && this.gameState.activeTurnSocket !== userSocket) {
@@ -202,7 +197,7 @@ class Room{
 
     checkIfAlreadyGuessed(userSocket) {
         //quick check to see if the array is empty
-        if(this.correctGuessSockets.length === 0){
+        if (this.correctGuessSockets.length === 0) {
             return false;
         }
         //returns boolean considering if there is a socket with the id in the array
@@ -210,44 +205,48 @@ class Room{
     }
 
 
-    addScore(userSocket){
+    addScore(userSocket) {
         userSocket.score += (1000 - (this.correctGuessSockets.length * 100));
         //adding score means player guessed
         this.correctGuessSockets.push(userSocket);
 
     }
 
-    addScoreToDrawer(userSocket){
+    addScoreToDrawer(userSocket) {
         //adds points to the current active drawing player based on how many players guessed
-        userSocket.score += Math.round(100 * this.correctGuessSockets.length);
+        if(this.userSockets.length === 2){
+            userSocket.score += 1050;
+            return;
+        }
+        userSocket.score += Math.round(((12 - this.userSockets.length) * 100) * this.correctGuessSockets.length);
     }
 
-    nextTurn(activeTurnSocketLeft){
+    nextTurn(activeTurnSocketLeft) {
         //add score to the drawer
         this.addScoreToDrawer(this.gameState.activeTurnSocket);
 
         //check if the game is over
-        if(this.gameState.currentTurn >= this.randomWords.length){
+        if (this.gameState.currentTurn >= this.randomWords.length) {
             this.gameState.canvasData = [];
             clearInterval(this.timerInterval);
             return false;
 
-        }else{
+        } else {
             //game is not over so moving on to the next turn
             //and resetting some resources
 
             //if the leaving socket is the one the actively drawing do not change the index
-            if(!activeTurnSocketLeft){
+            if (!activeTurnSocketLeft) {
                 this.gameState._turn = this.gameState.currentTurn++ % this.userSockets.length;
-            }else{
+            } else {
                 //this means the drawing player who left was the last player in the list
-                if(this.gameState._turn === this.userSockets.length){
+                if (this.gameState._turn === this.userSockets.length) {
                     this.gameState._turn = 0;
                 }
                 this.gameState.currentTurn++;
             }
             this.gameState.activeTurnSocket = this.userSockets[this.gameState._turn];
-            this.gameState.activeWord = this.randomWords[this.gameState.currentTurn-1].key;
+            this.gameState.activeWord = this.randomWords[this.gameState.currentTurn - 1].key;
             this.gameState.canvasData = [];
             this.correctGuessSockets = [];
             this.activeTimerCount = this.timerMaxLimit;
@@ -255,11 +254,11 @@ class Room{
         return true;
     }
 
-    sendGameStateToActiveSocket(){
+    sendGameStateToActiveSocket() {
         this.gameState.activeTurnSocket.emit('gameState',
             {
                 status: 'success',
-                game:{
+                game: {
                     status: this.gameState.status,
                     _turn: this.gameState._turn,
                     currentTurn: this.gameState.currentTurn,
@@ -272,15 +271,15 @@ class Room{
             });
     }
 
-    sendGameStateToOtherSockets(){
+    sendGameStateToOtherSockets() {
         let hint = '';
-        for(let i = 0; i < this.gameState.activeWord.length; i++){
+        for (let i = 0; i < this.gameState.activeWord.length; i++) {
             hint += '_ '
         }
         this.gameState.activeTurnSocket.to(this.roomName).emit('gameState',
             {
                 status: 'success',
-                game:{
+                game: {
                     status: this.gameState.status,
                     _turn: this.gameState._turn,
                     currentTurn: this.gameState.currentTurn,
@@ -293,11 +292,11 @@ class Room{
             });
     }
 
-    sendGameStateToSocket(socket){
+    sendGameStateToSocket(socket) {
         socket.emit('gameState',
             {
                 status: 'success',
-                game:{
+                game: {
                     status: this.gameState.status,
                     _turn: this.gameState._turn,
                     currentTurn: this.gameState.currentTurn,
@@ -310,11 +309,11 @@ class Room{
             });
     }
 
-    sendGameStateToAllSockets(){
+    sendGameStateToAllSockets() {
         this.io.to(this.roomName).emit('gameState',
             {
                 status: 'success',
-                game:{
+                game: {
                     status: this.gameState.status,
                     _turn: this.gameState._turn,
                     currentTurn: this.gameState.currentTurn,
@@ -328,32 +327,32 @@ class Room{
     }
 
 
-    pushCanvasData(xy){
+    pushCanvasData(xy) {
         this.gameState.canvasData.push(xy);
     }
 
-    pushChatData(message){
+    pushChatData(message) {
         this.gameState.chatData.push(message);
     }
 
-    addUser(userSocket){
+    addUser(userSocket) {
         this.userSockets.push(userSocket);
         return userSocket;
     }
 
-    removeUser(userSocket){
+    removeUser(userSocket) {
         const user = this.getUser(userSocket);
-        if(user){
-            this.userSockets = this.userSockets.filter((user)=> user !== userSocket);
+        if (user) {
+            this.userSockets = this.userSockets.filter((user) => user !== userSocket);
         }
         return user;
     }
 
-    getUser(userSocket){
-        return this.userSockets.filter((user)=> user === userSocket)[0];
+    getUser(userSocket) {
+        return this.userSockets.filter((user) => user === userSocket)[0];
     }
 
-    getActiveUsers(){
+    getActiveUsers() {
         return this.userSockets.map((user) => {
             return {
                 userName: user.userName,
@@ -364,35 +363,35 @@ class Room{
 
 }
 
-class ActiveRoomList{
+class ActiveRoomList {
 
-    constructor(){
+    constructor() {
         this.rooms = [];
     }
 
-    addRoom(room){
+    addRoom(room) {
         this.rooms.push(room);
         return room;
     }
 
-    removeRoom(roomName){
+    removeRoom(roomName) {
         const user = this.getRoom(roomName);
 
-        if(user){
-            this.rooms = this.rooms.filter((room)=> room.roomName !== roomName);
+        if (user) {
+            this.rooms = this.rooms.filter((room) => room.roomName !== roomName);
         }
         return user;
     }
 
-    getRoom(roomName){
-        return this.rooms.filter((room)=> room.roomName === roomName)[0];
+    getRoom(roomName) {
+        return this.rooms.filter((room) => room.roomName === roomName)[0];
     }
 
-    getActiveRoomNames(){
+    getActiveRoomNames() {
         return this.rooms.map((room) => {
             return {
                 roomName: room.roomName,
-                slot: room.userSockets.length + ' / '+ room.maxPlayerCount
+                slot: room.userSockets.length + ' / ' + room.maxPlayerCount
             };
         });
     }
@@ -402,5 +401,5 @@ class ActiveRoomList{
 let activeRoomList = new ActiveRoomList();
 
 
-module.exports.Room= Room;
+module.exports.Room = Room;
 module.exports.activeRoomList = activeRoomList;

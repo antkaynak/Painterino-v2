@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {Router} from "@angular/router";
 import {MatDialog} from "@angular/material";
 import {AboutComponent} from "./about/about.component";
@@ -10,7 +10,8 @@ import {AboutComponent} from "./about/about.component";
 })
 export class HomeComponent implements OnInit {
 
-  constructor(private router: Router, public dialog: MatDialog) { }
+  constructor(private router: Router, public dialog: MatDialog) {
+  }
 
   ngOnInit() {
   }

@@ -1,11 +1,11 @@
 
-.tool-box{
+.tool-box {
   background-color: white;
   text-align: center;
   width: 100%;
 }
 
-.color-picker{
+.color-picker {
   width: 1.5rem;
   height: 1.5rem;
   padding: .5rem;
@@ -14,6 +14,6 @@
   cursor: pointer;
 }
 
-#color-picker-wrapper{
+#color-picker-wrapper {
   cursor: pointer;
 }

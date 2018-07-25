@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {SocketService} from "../../../services/socket.service";
 import {MatDialogRef} from "@angular/material";
 import {FormControl, FormGroup, Validators} from "@angular/forms";
@@ -12,25 +12,29 @@ import * as BlankValidator from "../../../services/validators/blank.validator"
 export class CreateComponent implements OnInit {
 
   roomForm: FormGroup;
-  passwordDisabled : boolean = true;
+  passwordDisabled: boolean = true;
 
   constructor(private socketService: SocketService,
-              public dialogRef: MatDialogRef<CreateComponent>) { }
+              public dialogRef: MatDialogRef<CreateComponent>) {
+  }
 
   ngOnInit() {
     this.roomForm = new FormGroup({
-      'roomName': new FormControl(null,[Validators.required, BlankValidator.checkIfBlankValidator]),
-      'roomPassword': new FormControl({value: null, disabled: this.passwordDisabled},[BlankValidator.checkIfBlankValidator]),
+      'roomName': new FormControl(null, [Validators.required, BlankValidator.checkIfBlankValidator]),
+      'roomPassword': new FormControl({
+        value: null,
+        disabled: this.passwordDisabled
+      }, [BlankValidator.checkIfBlankValidator]),
       'min': new FormControl('2', [Validators.required]),
       'max': new FormControl('10', [Validators.required])
     });
   }
 
-  cancel(){
+  cancel() {
     this.dialogRef.close();
   }
 
-  onSubmitted(){
+  onSubmitted() {
     const roomName = this.roomForm.controls.roomName.value;
     const roomPassword = this.roomForm.controls.roomPassword.value;
     const min = this.roomForm.controls.min.value;
@@ -42,9 +46,9 @@ export class CreateComponent implements OnInit {
 
   passwordToggle() {
     this.passwordDisabled = !this.passwordDisabled;
-    if(this.passwordDisabled){
+    if (this.passwordDisabled) {
       this.roomForm.get('roomPassword').disable();
-    }else{
+    } else {
       this.roomForm.get('roomPassword').enable();
     }
   }

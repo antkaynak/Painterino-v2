@@ -1,4 +1,3 @@
-
 <div class="room-list" fxLayout="row" fxLayout.xs="column" fxLayoutWrap fxLayoutGap="0.5%" fxLayoutAlign="center">
   <div fxFlex="60%" class="left-panel">
     <div *ngIf="activeRooms.length === 0">
@@ -17,12 +16,12 @@
     <mat-list style="position: relative; height: 100%">
       <mat-list-item>
         <button mat-raised-button (click)="openJoin('')">
-        <i class="material-icons" style="float: left; line-height: inherit">play_arrow</i> Join
+          <i class="material-icons" style="float: left; line-height: inherit">play_arrow</i> Join
         </button>
       </mat-list-item>
       <mat-list-item>
         <button mat-raised-button (click)="openCreate()">
-        <i class="material-icons" style="float: left; line-height: inherit">add</i> Create
+          <i class="material-icons" style="float: left; line-height: inherit">add</i> Create
         </button>
       </mat-list-item>
       <mat-list-item>

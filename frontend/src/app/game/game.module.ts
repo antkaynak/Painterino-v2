@@ -5,11 +5,11 @@ import {GameRoutes} from "./game.routes";
 import {CanvasComponent} from "./canvas/canvas.component";
 import {GameComponent} from "./game.component";
 import {FlexLayoutModule} from "@angular/flex-layout";
-import { UserListComponent } from './user-list/user-list.component';
-import { ChatComponent } from './chat/chat.component';
+import {UserListComponent} from './user-list/user-list.component';
+import {ChatComponent} from './chat/chat.component';
 import {MaterialModule} from "../material.module";
 import {ColorPickerModule} from "ngx-color-picker";
-import { ToolbarComponent } from './toolbar/toolbar.component';
+import {ToolbarComponent} from './toolbar/toolbar.component';
 
 
 @NgModule({
